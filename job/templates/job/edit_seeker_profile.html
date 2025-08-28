@@ -1,0 +1,55 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2>Edit Your Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" 
+                   value="{{ seeker_profile.first_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" 
+                   value="{{ seeker_profile.last_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" 
+                   value="{{ seeker_profile.email }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="phone_number" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number" 
+                   value="{{ seeker_profile.phone_number }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="resume" class="form-label">Resume</label>
+            <input type="file" class="form-control" id="resume" name="resume">
+            {% if seeker_profile.resume %}
+                <small>Current File: <a href="{{ seeker_profile.resume.url }}" target="_blank">View Resume</a></small>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="skills" class="form-label">Skills</label>
+            <textarea class="form-control" id="skills" name="skills" rows="3">{{ seeker_profile.skills }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="experience" class="form-label">Experience</label>
+            <textarea class="form-control" id="experience" name="experience" rows="3">{{ seeker_profile.experience }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
+</div>
+
+{% endblock %}

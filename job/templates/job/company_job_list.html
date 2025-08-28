@@ -1,0 +1,106 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<style>
+/* Round, big, animated logo */
+.company-logo {
+    width: 120px;            /* bigger size */
+    height: 120px;
+    border-radius: 50%;      /* makes it round */
+    object-fit: cover;       /* ensures image covers the container */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* fancy shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* smooth hover */
+}
+
+.company-logo:hover {
+    transform: scale(1.15) rotate(5deg); /* subtle zoom & rotate effect */
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25); /* intensified shadow */
+    cursor: pointer;
+}
+
+.no-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eef2ff, #4361ee);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.no-logo:hover {
+    transform: scale(1.15) rotate(-5deg);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+}
+</style>
+
+<div class="container mt-5">
+    <!-- Company Header -->
+    <div class="d-flex align-items-center mb-5 p-3 bg-light rounded shadow-sm">
+        {% if company.logo %}
+            <img src="{{ company.logo.url }}" alt="{{ company.comapany_name }} Logo" class="me-3 company-logo">
+        {% else %}
+            <div class="me-3 no-logo">
+                <span>No Logo</span>
+            </div>
+        {% endif %}
+        <div>
+            <h2 class="mb-1">{{ company.comapany_name }}</h2>
+            <p class="mb-0 text-muted">{{ company.description }}</p>
+            <small>Total Jobs: {{ total_jobs }}</small>
+        </div>
+    </div>
+
+    <!-- Jobs List -->
+    <div class="row">
+        {% for job in jobs %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ job.title }}</h5>
+                    <p class="card-text">{{ job.description|truncatewords:20 }}</p>
+                    <p><strong>Location:</strong> {{ job.location }}</p>
+                    <p><strong>Posted:</strong> {{ job.posted_on|date:"M d, Y" }}</p>
+                    <a href="{% url 'view_jobdetail' job.id %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No jobs available for this company.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if jobs.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if jobs.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ jobs.previous_page_number }}" aria-label="Previous">&laquo;</a>
+            </li>
+            {% endif %}
+
+            {% for num in jobs.paginator.page_range %}
+                {% if jobs.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if jobs.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ jobs.next_page_number }}" aria-label="Next">&raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+{% endblock %}

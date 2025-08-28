@@ -1,0 +1,593 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-light: #eef2ff;
+        --primary-dark: #3a56d4;
+        --secondary: #3f37c9;
+        --accent: #f72585;
+        --success: #4cc9f0;
+        --warning: #f8961e;
+        --danger: #f94144;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .job-listing-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #f9f9f9ff 100%);
+        min-height: 120vh;
+        padding: 4rem 0;
+        width: 100%;
+    }
+
+    .job-header {
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .job-search-form .search-input {
+        min-width: 220px;
+        max-width: 300px;
+        border-radius: 12px;
+        border: 1px solid var(--light-gray);
+        padding: 0.55rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .job-search-form .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 5px rgba(67, 97, 238, 0.4);
+    }
+
+    .job-search-form .btn-search {
+        padding: 0.55rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .job-search-form .btn-search:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    .job-header h2 {
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .job-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    .job-header p {
+        color: var(--gray);
+        font-size: 1.15rem;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .job-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hover;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.05, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        position: relative;
+    }
+
+    .job-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .job-card-header {
+        padding: 1.75rem 1.75rem 1rem;
+        position: relative;
+    }
+
+   .job-company-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%; /* makes it round */
+    background: linear-gradient(135deg, #eef2ff, #4361ee); /* stylish background for empty logos */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* soft shadow */
+    position: absolute;
+    top: -20px;
+    right: 20px;
+    overflow: hidden;
+    border: 2px solid white; /* adds a subtle border */
+    transition: transform 0.3s ease;
+}
+.job-listing-inner {
+    width: 100%;
+    padding: 0; /* remove horizontal padding */
+    margin: 0 auto;
+}
+.job-company-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* cover looks better for rounded images */
+    border-radius: 50%; /* ensures image itself is circular */
+    transition: transform 0.3s ease;
+}
+.job-company-logo:hover {
+    transform: scale(1.1);
+}
+
+    .job-title {
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.75rem;
+        font-size: 1.4rem;
+        line-height: 1.3;
+    }
+
+    .job-type {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.35rem 0.9rem;
+        border-radius: 50px;
+        background-color: var(--primary-light);
+        color: var(--primary);
+        display: inline-block;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .job-company {
+        color: var(--gray);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .job-company i {
+        margin-right: 0.5rem;
+        color: var(--primary);
+    }
+
+    .job-card-body {
+        padding: 0 1.75rem 1.5rem;
+        flex-grow: 1;
+    }
+
+    .job-description {
+        color: var(--gray);
+        margin-bottom: 1.75rem;
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .job-meta-item {
+        display: flex;
+            flex-wrap: wrap;      /* ensure badges wrap to new line */
+
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--gray);
+        background: var(--light-gray);
+        padding: 0.5rem 0.9rem;
+        border-radius: 8px;
+    }
+
+    .job-meta-item i {
+        margin-right: 0.5rem;
+        color: var(--primary);
+    }
+
+    .job-card-footer {
+        padding: 1.25rem 1.75rem;
+        border-top: 1px solid var(--light-gray);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(249, 250, 251, 0.7);
+    }
+
+    .job-date-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .job-date {
+        font-size: 0.8rem;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+    }
+
+    .job-date i {
+        margin-right: 0.4rem;
+    }
+
+    .job-deadline {
+        font-size: 0.8rem;
+        color: var(--danger);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        margin-top: 0.3rem;
+    }
+
+    .job-deadline i {
+        margin-right: 0.4rem;
+    }
+
+    .job-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-job {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+    }
+
+    .btn-bookmark {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .btn-bookmark:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+    }
+
+    .no-jobs-card {
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        box-shadow: var(--card-shadow);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .no-jobs-icon {
+        font-size: 4rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .no-jobs-card h3 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .no-jobs-card p {
+        color: var(--gray);
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+    }
+
+    .btn-refresh {
+        background-color: var(--primary);
+        color: white;
+        padding: 0.7rem 1.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-refresh:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .pagination {
+        margin-top: 3rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .page-link {
+        color: var(--primary);
+        border-radius: 10px;
+        margin: 0 0.25rem;
+        border: 1px solid var(--light-gray);
+        padding: 0.6rem 1.1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .page-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        border-color: var(--primary-light);
+    }
+
+    .job-featured-badge {
+        position: absolute;
+        top: 0px;
+        left: -5px;
+        background: var(--accent);
+        color: white;
+        padding: 0.25rem 1.5rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 6px rgba(247, 37, 133, 0.2);
+        clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%);
+    }
+
+    @media (max-width: 992px) {
+        .job-header h2 { font-size: 2.2rem; }
+        .job-header p { font-size: 1.05rem; }
+    }
+
+    @media (max-width: 768px) {
+        .job-listing-container { padding: 3rem 0; }
+        .job-header h2 { font-size: 1.8rem; }
+        .job-meta { flex-direction: column; gap: 0.75rem; }
+        .job-card-footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+        .job-actions { width: 100%; justify-content: space-between; }
+        .job-company-logo { width: 50px; height: 50px; top: -35px; }
+    }
+
+    @media (max-width: 576px) {
+        .job-header h2 { font-size: 1.6rem; }
+        .job-header p { font-size: 1rem; }
+        .job-title { font-size: 1.2rem; }
+        .btn-job { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+    }
+</style>
+
+<div class="job-listing-container">
+<div class="job-listing-inner">
+    <div class="job-header">
+        {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+        <h2>Discover Your Dream Job</h2>
+        <p>Explore exciting career opportunities from leading companies across various industries</p>
+
+        <!-- Search Bar -->
+       <div class="job-search-form mb-5">
+    <form method="get" action="{% url 'browse_jobs' %}" class="d-flex flex-wrap gap-2 justify-content-center">
+        
+        <!-- Search text -->
+        <input type="text" name="search" value="{{ search_query }}" 
+               placeholder="Search jobs..." class="form-control search-input">
+
+        <!-- Location text -->
+        <input type="text" name="location" value="{{ location_query }}" 
+               placeholder="Location..." class="form-control search-input">
+
+        <!-- Category dropdown -->
+        <select name="category" class="form-control search-input">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if category_query == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-search">
+            <i class="fas fa-search me-1"></i> Search
+        </button>
+    </form>
+</div>
+
+    </div>
+
+    <div class="row">
+        {% for job in jobs %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="job-card">
+                {% if forloop.counter <= 3 %}
+                <div class="job-featured-badge">Featured</div>
+                {% endif %}
+                
+                <div class="job-card-header">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <a href="{% url 'view_jobdetail' job.id %}" class="text-decoration-none">
+                            
+                        <h3 class="job-title">{{ job.title }}</h3>
+                        </a>
+                    </div>
+                    <span class="job-type">{{ job.job_type }}</span>
+                    <p class="job-company mt-3">
+                        <i class="fas fa-building"></i>{{ job.employer.user.username|title }}
+                    </p>
+                    
+                    <div class="job-company-logo">
+    {% if job.employer.logo %}
+        <img src="{{ job.employer.logo.url }}" alt="{{ job.employer.user.username }} Logo">
+    {% else %}
+        <i class="fas fa-building" style="color: white; font-size: 1.5rem;"></i>
+    {% endif %}
+</div>
+                </div>
+                
+                <div class="job-card-body">
+                    <p class="job-description">{{ job.description|truncatechars:180 }}</p>
+                    <div class="job-meta">
+                        <div class="job-meta-item"><i class="fas fa-map-marker-alt"></i>{{ job.location }}</div>
+                        <div class="job-meta-item"><i class="fas fa-tag"></i>{{ job.category.name }}</div>
+                        {% if job.salary_range %}
+                        <div class="job-meta-item"><i class="fas fa-money-bill-wave"></i>{{ job.salary_range }}</div>
+                        {% else %}
+                        {% endif %}
+                        <div class="job-meta-item">
+                        <i class="fas fa-tools"></i> Skills Required: 
+                        
+                        {% for skill in job.required_skills.all %}
+                            <span class="badge bg text-black">{{ skill.name }}</span>
+                        {% empty %}
+                            <span>Not available</span>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="job-card-footer">
+                    <div class="job-date-info">
+                <span class="job-date">
+                    <i class="far fa-clock"></i>
+                    Posted {{ job.posted_on|timesince }} ago
+                </span></span>
+                        <span class="job-deadline"><i class="far fa-calendar-times"></i>Apply by: {{ job.deadline|date:"M d, Y" }}</span>
+                    </div>
+                    {% if user.is_job_seeker %}
+                        {% if not job.id in applied_jobs %}
+                            <div class="job-actions">
+                                <a href="{% url 'toggle_save_job' job.id %}" class="btn-bookmark d-flex align-items-center justify-content-center {% if job.id in saved_jobs %}saved{% endif %}">
+                                    {% if job.id in saved_jobs %}
+                                        <i class="fas fa-bookmark"></i>
+                                    {% else %}
+                                        <i class="far fa-bookmark"></i>
+                                    {% endif %}
+                                </a>
+                                <a href="{% url 'view_jobdetail' job.id %}" class="btn btn-primary btn-job">Apply Now</a>
+                            </div>
+                        {% else %}
+                            <div class="job-actions">
+                                <button class="btn btn-secondary btn-job" disabled>Already Applied</button>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        {% if not user.is_authenticated %}
+                            <div class="job-actions">
+                                <a href="{% url 'login' %}" class="btn btn-primary btn-job">Login to Apply</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="no-jobs-card">
+                <div class="no-jobs-icon"><i class="fas fa-search"></i></div>
+                <h3>No Jobs Found</h3>
+                <p>We couldn't find any jobs matching your criteria. Try adjusting your search filters or check back later for new opportunities.</p>
+                <button class="btn-refresh"><i class="fas fa-sync-alt me-2"></i>Refresh Jobs</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if jobs.has_other_pages %}
+    <nav aria-label="Job listings pagination">
+        <ul class="pagination">
+            {% if jobs.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ request.GET.q }}&page={{ jobs.previous_page_number }}" aria-label="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a></li>
+            {% endif %}
+            
+            {% for i in jobs.paginator.page_range %}
+                {% if jobs.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if jobs.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ request.GET.q }}&page={{ jobs.next_page_number }}" aria-label="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+</div>
+
+{% endblock content %}

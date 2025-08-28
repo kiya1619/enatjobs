@@ -1,0 +1,16 @@
+<!-- notifications.html -->
+<div class="notifications">
+    <h4>Notifications</h4>
+    <ul>
+        {% for notif in notifications %}
+            <li {% if not notif.is_read %}style="font-weight:bold;"{% endif %}>
+                <a href="{% url 'mark_notification_read' notif.pk %}">
+                    {{ notif.title }} - {{ notif.message }}
+                    <small>{{ notif.created_at|timesince }} ago</small>
+                </a>
+            </li>
+        {% empty %}
+            <li>No notifications</li>
+        {% endfor %}
+    </ul>
+</div>

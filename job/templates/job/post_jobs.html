@@ -1,0 +1,106 @@
+{% extends 'seeker_base.html' %}
+
+{% block content %}
+<!-- CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Limit dropdown height and enable scroll */
+    .select2-container--default .select2-results__options {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Post a New Job</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="title" class="form-label">Job Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter job title" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Job Description</label>
+            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Describe the job responsibilities" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Job Category</label>
+            <select class="form-select" id="category" name="category">
+                <option value="">Select Category</option>
+                {% for cat in job_cat %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="required_skills" class="form-label">Required Skills</label>
+           <select class="form-select" id="required_skills" name="required_skills" multiple="multiple">
+    {% for skill in skills %}
+        <option value="{{ skill.id }}">{{ skill.name }}</option>
+    {% endfor %}
+</select>
+        </div>
+
+        <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <select class="form-select" id="location" name="location" required>
+                <option value="">Select City</option>
+                {% for city in ethiopian_cities %}
+                    <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="job_type" class="form-label">Job Type</label>
+            <select class="form-select" id="job_type" name="job_type" required>
+                <option value="">Select Type</option>
+                <option value="full-time">Full-time</option>
+                <option value="part-time">Part-time</option>
+                <option value="internship">Internship</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="salary_range" class="form-label">Salary Range</label>
+            <input type="text" class="form-control" id="salary_range" name="salary_range" placeholder="E.g., ETB 3000 - ETB 5000">
+        </div>
+
+        <div class="mb-3">
+            <label for="deadline" class="form-label">Application Deadline</label>
+            <input type="date" class="form-control" id="deadline" name="deadline" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Post Job</button>
+    </form>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#required_skills').select2({
+        placeholder: "Select required skills",
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
+
+{% endblock %}

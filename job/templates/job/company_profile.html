@@ -1,0 +1,225 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<style>
+    /* Container */
+    .company-profile-container {
+        background: #f5f6fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Card */
+    .profile-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Header */
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .profile-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    .profile-header p {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    /* Sections */
+    .form-section {
+        margin-bottom: 1.5rem;
+    }
+    .form-section h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    .form-section p {
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    /* Form Controls */
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 1rem;
+    }
+    .form-control:focus {
+        border-color: #4a90e2;
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #4a90e2;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background-color: #357ab8;
+    }
+    .btn-outline-secondary {
+        border: 1px solid #999;
+        border-radius: 20px;
+        padding: 0.6rem 1.5rem;
+        color: #333;
+        background-color: #fff;
+        cursor: pointer;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #eee;
+    }
+
+    /* Logo Preview */
+    .logo-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-top: 0.5rem;
+    }
+
+    /* Upload area */
+    .upload-area {
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .upload-area:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .profile-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="company-profile-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+
+                <!-- Header -->
+                <div class="profile-header">
+                    <h1>{% if employer_profile %}Update{% else %}Create{% endif %} Company Profile</h1>
+                    <p>Provide key details about your company to attract candidates</p>
+                </div>
+
+                <!-- Profile Form -->
+                <div class="profile-card">
+                    <form method="POST" enctype="multipart/form-data" id="companyProfileForm">
+                        {% csrf_token %}
+
+                        <!-- Company Identity -->
+                        <div class="form-section">
+                            <h4>Company Identity</h4>
+                            <input type="text" class="form-control" id="company_name" name="company_name"
+                                value="{% if employer_profile %}{{ employer_profile.comapany_name }}{% endif %}"
+                                placeholder="Company Name *" required>
+                            <input type="url" class="form-control" id="website" name="website"
+                                value="{% if employer_profile %}{{ employer_profile.website }}{% endif %}"
+                                placeholder="Website">
+                           <div class="upload-area" onclick="document.getElementById('logo').click()">
+    Click to upload logo
+    <input type="file" class="d-none" id="logo" name="logo" accept="image/*">
+    <img id="logoPreview" class="logo-preview" style="display:none;">
+</div>
+                            {% if employer_profile.logo %}
+                                <img src="{{ employer_profile.logo.url }}" alt="Logo" class="logo-preview">
+                            {% endif %}
+                        </div>
+
+                        <!-- Company Description -->
+                        <div class="form-section">
+                            <h4>About Your Company</h4>
+                            <textarea class="form-control" id="description" name="description" rows="5"
+                                placeholder="Describe your company">{% if employer_profile %}{{ employer_profile.About_company }}{% endif %}</textarea>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="form-section">
+                            <h4>Contact Information</h4>
+                            <input type="tel" class="form-control" id="phone" name="phone"
+                                value="{% if employer_profile %}{{ employer_profile.contact_phone }}{% endif %}" placeholder="Phone">
+                            <input type="email" class="form-control" id="email" name="email"
+                                value="{% if employer_profile %}{{ employer_profile.contact_email }}{% endif %}" placeholder="Email">
+                            <input type="text" class="form-control" id="address" name="address"
+                                value="{% if employer_profile %}{{ employer_profile.address }}{% endif %}" placeholder="Address">
+                        </div>
+
+                        <!-- Social Media -->
+                        <div class="form-section">
+                            <h4>Social Media</h4>
+                            <input type="url" class="form-control" name="linkedin"
+                                value="{% if employer_profile %}{{ employer_profile.linkedin_url }}{% endif %}" placeholder="LinkedIn">
+                            <input type="url" class="form-control" name="twitter"
+                                value="{% if employer_profile %}{{ employer_profile.twitter_url }}{% endif %}" placeholder="Twitter">
+                            <input type="url" class="form-control" name="facebook"
+                                value="{% if employer_profile %}{{ employer_profile.facebook_url }}{% endif %}" placeholder="Facebook">
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'employer_dashboard' %}" class="btn btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-primary">Save Profile</button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logoInput = document.getElementById('logo');
+    const logoPreview = document.getElementById('logoPreview');
+
+    logoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(file){
+            const reader = new FileReader();
+            reader.onload = function(e){
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = 'block'; // Show image when selected
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{% endblock %}

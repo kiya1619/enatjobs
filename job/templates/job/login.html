@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}Login | Job Portal{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px; /* space for navbar */
+    }
+
+    /* Background elements */
+    body::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        left: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(31, 58, 147, 0.1);
+        border-radius: 50%;
+        z-index: -1;
+    }
+    body::after {
+        content: "";
+        position: absolute;
+        bottom: -80px;
+        right: -80px;
+        width: 300px;
+        height: 300px;
+        background: rgba(31, 58, 147, 0.1);
+        border-radius: 50%;
+        z-index: -1;
+    }
+    .bg-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(31, 58, 147, 0.05);
+        z-index: -1;
+    }
+    .bg-circle-1 { width: 150px; height: 150px; top: 20%; right: 15%; }
+    .bg-circle-2 { width: 100px; height: 100px; bottom: 30%; left: 20%; }
+    .bg-circle-3 { width: 60px; height: 60px; top: 70%; left: 30%; }
+    .bg-circle-4 { width: 80px; height: 80px; top: 40%; right: 25%; }
+
+    /* Login card */
+    .login-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .login-header { text-align: center; margin-bottom: 1.5rem; }
+    .login-header h2 { margin-bottom: 0.3rem; font-weight: 600; color: #1f3a93; }
+    .login-header p { color: #6c757d; font-size: 0.95rem; }
+    .form-control { border-radius: 8px; padding: 0.75rem 1rem; border: 1px solid #ccc; font-size: 0.95rem; }
+    .btn-login { background-color: #1f3a93; color: #fff; border-radius: 8px; padding: 0.65rem; width: 100%; font-weight: 500; transition: 0.3s; }
+    .btn-login:hover { background-color: #3754b2; }
+    .input-icon { background-color: #f1f3f6; border: none; }
+    .toggle-password { background-color: #f1f3f6; border: none; cursor: pointer; }
+    .text-muted a { color: #1f3a93; text-decoration: none; }
+    .text-muted a:hover { text-decoration: underline; }
+    .divider { text-align: center; color: #adb5bd; margin: 1.5rem 0; position: relative; }
+    .divider::before,
+    .divider::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: #dee2e6;
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-circle bg-circle-1"></div>
+<div class="bg-circle bg-circle-2"></div>
+<div class="bg-circle bg-circle-3"></div>
+<div class="bg-circle bg-circle-4"></div>
+
+<div class="login-card">
+    <div class="login-header">
+        {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <h2><i class="fas fa-user-circle me-1"></i>Welcome Back</h2>
+        <p>Sign in to your account</p>
+    </div>
+
+    <form method="POST" id="loginForm">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="mb-3">
+            <label for="username" class="form-label fw-semibold">Username</label>
+            <div class="input-group">
+                <span class="input-group-text input-icon"><i class="fas fa-user"></i></span>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+            </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+                <span class="input-group-text input-icon"><i class="fas fa-lock"></i></span>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                <span class="input-group-text toggle-password" id="togglePassword"><i class="fas fa-eye"></i></span>
+            </div>
+        </div>
+
+        <!-- Remember & Forgot -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                <label class="form-check-label" for="remember">Remember me</label>
+            </div>
+            <a href="#" class="text-decoration-none">Forgot password?</a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-login mb-3"><i class="fas fa-sign-in-alt me-1"></i>Login</button>
+
+        <!-- Divider -->
+        <div class="divider">OR</div>
+
+        <!-- Social Login -->
+        <div class="text-center mb-3">
+            <p class="text-muted mb-2">Continue with</p>
+            <a href="#" class="btn btn-outline-primary me-2"><i class="fab fa-google"></i></a>
+            <a href="#" class="btn btn-outline-primary me-2"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="btn btn-outline-primary"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+
+        <!-- Register -->
+        <div class="text-center text-muted">
+            <p class="mb-0">Don't have an account? 
+                <a href="{% url 'register' %}">Sign up</a>
+            </p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    togglePassword.addEventListener('click', () => {
+        const password = document.getElementById('password');
+        const type = password.type === 'password' ? 'text' : 'password';
+        password.type = type;
+        togglePassword.querySelector('i').classList.toggle('fa-eye');
+        togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+</script>
+{% endblock %}
+<!-- Navbar (in base.html) -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">
+                <i class="fas fa-briefcase me-2"></i>JobPortal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav

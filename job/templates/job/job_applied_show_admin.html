@@ -1,0 +1,75 @@
+{% extends 'seeker_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">All Job Applications</h2>
+{% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    {% if applications %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Applicant</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th>Cover Letter</th>
+                    <th>Resume</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ app.applicant.username }}</td>
+                    <td>{{ app.job.title }}</td>
+                    <td>{{ app.job.employer.company_name }}</td>
+                    <td>{{ app.applied_on|date:"M d, Y H:i" }}</td>
+                    <td>
+                        {% if app.status == 'applied' %}
+                            <span class="badge bg-primary">Applied</span>
+                        {% elif app.status == 'reviewed' %}
+                            <span class="badge bg-info text-dark">Reviewed</span>
+                        {% elif app.status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% elif app.status == 'accepted' %}
+                            <span class="badge bg-success">Accepted</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if app.cover_letter %}
+                            {{ app.cover_letter|truncatewords:15 }}
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if app.resume %}
+                            <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View</a>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td> <a href="{% url 'delete_job_applications' app.id %}">Delete</a> </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning">
+            No job applications found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

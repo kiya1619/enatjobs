@@ -1,0 +1,97 @@
+{% extends 'seeker_base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <h4 class="mb-3">My Applications</h4>
+    
+    {% if applications %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Job</th>
+                        <th>Employer</th>
+                        <th>Applied</th>
+                        <th>Status</th>
+                        <th></th>
+                        
+                        <th>Action</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ app.job.title|truncatechars:50 }}</td>
+                        <td>{{ app.job.employer.comapany_name|title|truncatechars:15 }}</td>
+                        <td>{{ app.applied_on|date:"M d Y" }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if app.status == 'accepted' %}bg-success
+                                {% elif app.status == 'rejected' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ app.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- Button to trigger modal -->
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#detailsModal{{ app.id }}">
+                                Details
+                            </button>
+                        </td>
+                       <td>
+                        {% if app.status == 'applied' %}
+                            <form method="post" action="{% url 'withdraw_application' app.id %}"
+                                onsubmit="return confirm('Are you sure you want to withdraw this application?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">Withdraw</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                          </tr>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="detailsModal{{ app.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">{{ app.job.title }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Employer:</strong> {{ app.job.employer.comapany_name }}</p>
+                                    <p><strong>Applied on:</strong> {{ app.applied_on|date:"M d Y" }}</p>
+                                    <p><strong>Status:</strong> {{ app.status|title }}</p>
+                                    <hr>
+                                    <p><strong>Cover Letter:</strong></p>
+                                    <p>{{ app.cover_letter }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info py-2">
+            <small>No applications found.</small>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary mb-3">Featured Companies</h1>
+            <p class="lead text-muted">Discover organizations hiring in your field</p>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for company in company_list %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card company-card h-100 shadow-sm border-0">
+                <!-- Company Header with Logo -->
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <div class="d-flex align-items-center">
+                        {% if company.logo %}
+                        <a href=" {% url 'company_job_list' company.id  %} " style="text-decoration: none;">
+                        <div class="company-logo me-3">
+                            <img src="{{ company.logo.url }}" alt="{{ company.comapany_name }} logo" 
+                                 class="img-fluid rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
+                        </div>
+                        
+                        {% endif %}
+                        <div>
+                            <h3 class="h5 mb-1">{{ company.comapany_name }}</h3>
+                            </a>
+                            {% if company.website %}
+                            <a href="{{ company.website }}" target="_blank" class="text-decoration-none small text-muted">
+                                <i class="fas fa-globe me-1"></i> Website
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Company Body -->
+                <div class="card-body">
+                    <!-- About Section -->
+                    {% if company.About_company %}
+                    <div class="mb-3">
+                        <h4 class="h6 text-primary">About</h4>
+                        <p class="small">{{ company.About_company|truncatechars:200 }}</p>
+                        <a href="#" class="small text-primary text-decoration-none">Read more</a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Contact Info -->
+                    <div class="mb-3">
+                        <h4 class="h6 text-primary">Contact</h4>
+                        <ul class="list-unstyled small">
+                            {% if company.contact_email %}
+                            <li class="mb-1">
+                                <i class="fas fa-envelope text-muted me-2"></i>
+                                <a href="mailto:{{ company.contact_email }}" class="text-decoration-none">
+                                    {{ company.contact_email }}
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if company.contact_phone %}
+                            <li class="mb-1">
+                                <i class="fas fa-phone text-muted me-2"></i>
+                                {{ company.contact_phone }}
+                            </li>
+                            {% endif %}
+                            {% if company.address %}
+                            <li class="mb-1">
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                {{ company.address }}
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <!-- Social Links -->
+                    {% if company.linkedin_url or company.twitter_url or company.facebook_url %}
+                    <div class="mb-3">
+                        <h4 class="h6 text-primary">Follow</h4>
+                        <div class="d-flex gap-3">
+                            {% if company.linkedin_url %}
+                            <a href="{{ company.linkedin_url }}" target="_blank" class="text-decoration-none text-muted">
+                                <i class="fab fa-linkedin fa-lg"></i>
+                            </a>
+                            {% endif %}
+                            {% if company.twitter_url %}
+                            <a href="{{ company.twitter_url }}" target="_blank" class="text-decoration-none text-muted">
+                                <i class="fab fa-twitter fa-lg"></i>
+                            </a>
+                            {% endif %}
+                            {% if company.facebook_url %}
+                            <a href="{{ company.facebook_url }}" target="_blank" class="text-decoration-none text-muted">
+                                <i class="fab fa-facebook fa-lg"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Company Footer -->
+                <div class="card-footer bg-light border-0">
+                    <a href="{% url 'company_job_list' company.id  %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-briefcase me-1"></i> View Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                    <h3 class="h4 text-muted">No Companies Found</h3>
+                    <p class="text-muted">There are currently no companies listed in our directory.</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if company_list %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Company pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .company-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .company-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .company-logo img {
+        transition: transform 0.3s ease;
+    }
+    .company-card:hover .company-logo img {
+        transform: scale(1.1);
+    }
+</style>
+
+{% endblock %}

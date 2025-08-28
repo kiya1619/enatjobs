@@ -1,0 +1,275 @@
+{% extends 'seeker_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header Section -->
+    <div class="card employer-header-card mb-4">
+        {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                {% if employer.logo %}
+                    <img src="{{ employer.logo.url }}" class="employer-logo rounded me-4" alt="{{ employer.comapany_name }} Logo">
+                {% else %}
+                    <div class="employer-logo-placeholder rounded me-4">
+                        <i class="fas fa-building fs-1 text-light"></i>
+                    </div>
+                {% endif %}
+                <div class="flex-grow-1">
+                    <h2 class="mb-1">{{ employer.comapany_name }}</h2>
+                    <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ employer.address }}</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'company_profile' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit Profile</a>
+                        <a href="{% url 'post_jobs' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Post New Job</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Jobs</h6>
+                            <h3 class="mb-0">{{ jobs_count }}</h3>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="stat-icon bg-primary bg-opacity-10">
+                                <i class="fas fa-briefcase text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Active Jobs</h6>
+                            <h3 class="mb-0">{{ active_jobs }}</h3>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="stat-icon bg-success bg-opacity-10">
+                                <i class="fas fa-check-circle text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Expired Jobs</h6>
+                            <h3 class="mb-0">{{ expired_jobs }}</h3>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="stat-icon bg-secondary bg-opacity-10">
+                                <i class="fas fa-clock text-secondary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Applications</h6>
+                            <h3 class="mb-0">{{ applications_count }}</h3>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="stat-icon bg-info bg-opacity-10">
+                                <i class="fas fa-file-alt text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Status -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="card-title mb-0">Application Status</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-2 col-4 mb-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-paper-plane text-primary fs-4"></i>
+                    </div>
+                    <h5 class="mt-2 mb-0">{{ apps_status.applied|default:0 }}</h5>
+                    <small class="text-muted">Applied</small>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-eye text-info fs-4"></i>
+                    </div>
+                    <h5 class="mt-2 mb-0">{{ apps_status.reviewed|default:0 }}</h5>
+                    <small class="text-muted">Reviewed</small>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-video text-warning fs-4"></i>
+                    </div>
+                    <h5 class="mt-2 mb-0">{{ apps_status.interview|default:0 }}</h5>
+                    <small class="text-muted">Interview</small>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-check text-success fs-4"></i>
+                    </div>
+                    <h5 class="mt-2 mb-0">{{ apps_status.accepted|default:0 }}</h5>
+                    <small class="text-muted">Accepted</small>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-times text-danger fs-4"></i>
+                    </div>
+                    <h5 class="mt-2 mb-0">{{ apps_status.rejected|default:0 }}</h5>
+                    <small class="text-muted">Rejected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Recent Applications</h5>
+            <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Job Title</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in recent_applications %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-placeholder-sm bg-light rounded-circle me-2">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                    <div>{{ app.applicant.username }}</div>
+                                </div>
+                            </td>
+                            <td>{{ app.job.title }}</td>
+                            <td>{{ app.applied_on|date:"M d, Y" }}</td>
+                            <td>
+                                {% if app.status == 'applied' %}
+                                    <span class="badge bg-primary">Applied</span>
+                                {% elif app.status == 'reviewed' %}
+                                    <span class="badge bg-info">Reviewed</span>
+                                {% elif app.status == 'interview' %}
+                                    <span class="badge bg-warning">Interview</span>
+                                {% elif app.status == 'accepted' %}
+                                    <span class="badge bg-success">Accepted</span>
+                                {% elif app.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ app.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'view_application' app.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fas fa-file-alt fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No applications yet</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .employer-header-card {
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .employer-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .employer-logo-placeholder {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #6c757d;
+    }
+    
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .avatar-placeholder-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "seeker_base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+           {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+        <h3 class="mb-3">Application Details</h3>
+        
+        <!-- Applicant Info -->
+        <div class="mb-3">
+            <h5>Applicant Information</h5>
+            <p><strong>Username:</strong> {{ application.applicant.username }}</p>
+            <p><strong>Email:</strong> {{ application.applicant.email }}</p>
+            <p><strong>Phone:</strong> {{ application.applicant.phone_number }}</p>
+        </div>
+        
+        <!-- Job Info -->
+        <div class="mb-3">
+            <h5>Job Information</h5>
+            <p><strong>Job Title:</strong> {{ application.job.title }}</p>
+            <p><strong>Description:</strong> {{ application.job.description }}</p>
+            <p><strong>Applied On:</strong> {{ application.applied_on|date:"M d, Y" }}</p>
+        </div>
+
+        <!-- Resume if available -->
+        {% if application.resume %}
+        <div class="mb-3">
+            <h5>Resume</h5>
+            <a href="{{ application.resume.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                View Resume
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Current Status -->
+        <div class="mb-3">
+            <h5>Application Status</h5>
+            <p>
+                {% if application.status == 'applied' %}
+                    <span class="badge bg-primary">Applied</span>
+                {% elif application.status == 'reviewed' %}
+                    <span class="badge bg-info">Reviewed</span>
+                {% elif application.status == 'interview' %}
+                    <span class="badge bg-warning">Interview</span>
+                {% elif application.status == 'accepted' %}
+                    <span class="badge bg-success">Accepted</span>
+                {% elif application.status == 'rejected' %}
+                    <span class="badge bg-danger">Rejected</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Action Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="status" class="form-label">Update Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="applied">Applied</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="interview">Interview</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+            <a href="{% url 'employer_dashboard' %}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

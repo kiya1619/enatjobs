@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | እናት Jobs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        body {
+            background: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .logo i {
+            font-size: 1.8rem;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #164ebd, #00c6ff);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .card {
+            border-radius: 15px;
+            transition: 0.3s;
+            background: white;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 6px 20px rgba(0,0,0,0.15);
+        }
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 5% 1.5rem;
+            margin-top: 4rem;
+        }
+        footer p {
+            margin: 0;
+            text-align: center;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <a href="{% url 'main' %}" class="logo">
+                <i class="fas fa-briefcase"></i>
+                <span>እናት Jobs</span>
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'main' %}">Home</a>
+                <a href="{% url 'browse_jobs' %}">Find Jobs</a>
+                <a href="{% url 'compaines' %}">Companies</a>
+                <a href="#career-resources">Career Resources</a>
+                <a href="{% url 'aboutus' %}">About Us</a>
+            </div>
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}" class="btn btn-outline">Log In</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero-section">
+        <h1>About እናት Jobs</h1>
+        <p class="lead">Connecting Employers with the Right Talent, and Job Seekers with the Right Opportunities.</p>
+    </div>
+
+    <!-- About Content -->
+    <div class="container" style="max-width:1100px; margin:50px auto;">
+        <div class="text-center">
+            <h2 class="section-title">Who We Are</h2>
+            <p style="color:#475569;">
+                እናት Jobs is a modern job portal designed to bridge the gap between talented job seekers 
+                and forward-thinking employers. Our mission is to create a reliable, easy-to-use platform 
+                that makes job searching and recruitment simpler, faster, and more efficient.
+            </p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2rem; margin-top:3rem;">
+            <div class="card">
+                <h4 style="color:#2563eb;">Our Mission</h4>
+                <p>To empower individuals by providing them with access to meaningful career opportunities while helping organizations find the right talent with ease.</p>
+            </div>
+            <div class="card">
+                <h4 style="color:#10b981;">Our Vision</h4>
+                <p>To become Ethiopia’s most trusted and innovative job portal, where employers and job seekers connect seamlessly to shape the future of work.</p>
+            </div>
+            <div class="card">
+                <h4 style="color:#ef4444;">Our Values</h4>
+                <p>Integrity, transparency, and inclusivity. We believe in building opportunities for everyone regardless of background or experience.</p>
+            </div>
+        </div>
+
+        <div class="text-center" style="margin-top:4rem;">
+            <h2 class="section-title">Why Choose እናት Jobs?</h2>
+            <p style="color:#475569;">Here’s what makes our platform stand out:</p>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; margin-top:2rem;">
+            <ul class="card">
+                <li>✔ Easy-to-use interface for both employers and job seekers</li>
+                <li>✔ Wide range of job categories and sectors</li>
+                <li>✔ Real-time application tracking</li>
+            </ul>
+            <ul class="card">
+                <li>✔ Employer dashboards for managing applications</li>
+                <li>✔ Secure and reliable platform</li>
+                <li>✔ Dedicated to Ethiopian job market needs</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 እናት Jobs | All Rights Reserved</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="text-primary mb-4">Apply for: {{ job.title }}</h2>
+            <h5 class="text-muted mb-4">Company: {{ job.employer.comapany_name  }}</h5>
+
+            <!-- Display success or error messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Cover letter -->
+                <div class="mb-3">
+                    <label for="cover_letter" class="form-label">Cover Letter</label>
+                    <textarea class="form-control" id="cover_letter" name="cover_letter" rows="6" placeholder="Write your cover letter here"></textarea>
+                </div>
+
+                <!-- Resume -->
+                <div class="mb-3">
+                    <label class="form-label">Resume <span class="text-danger">*</span></label>
+
+                    {% if request.user.seekerprofile.resume %}
+                        <!-- Notify the user -->
+                        <div class="alert alert-info">
+                            We will use your saved resume 
+                            <strong>({{ request.user.seekerprofile.resume.name }})</strong>.
+                            <br>You may upload a new resume if you want to replace it for this application.
+                        </div>
+
+                        <!-- Optional new upload -->
+                        <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx">
+                    {% else %}
+                        <!-- No saved resume: force upload -->
+                        <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                    {% endif %}
+                </div>
+
+                <!-- Buttons -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i> Submit Application
+                </button>
+                <a href="{% url 'view_jobdetail' job.id %}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Job
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

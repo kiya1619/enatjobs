@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: 80px; /* space for navbar */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        /* Navbar */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-brand.logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .navbar-brand.logo i {
+            font-size: 1.8rem;
+        }
+        .nav-btns .btn-nav {
+            margin-left: 0.5rem;
+        }
+
+        /* Background shapes */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 300px;
+            height: 300px;
+            background: rgba(31, 58, 147, 0.08);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: -150px;
+            right: -150px;
+            width: 400px;
+            height: 400px;
+            background: rgba(31, 58, 147, 0.08);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .bg-shape {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        .bg-shape-1 { width: 200px; height: 200px; background: radial-gradient(circle, #1f3a93 0%, transparent 70%); top: 10%; right: 10%; }
+        .bg-shape-2 { width: 150px; height: 150px; background: radial-gradient(circle, #1f3a93 0%, transparent 70%); bottom: 15%; left: 15%; }
+        .bg-shape-3 { width: 100px; height: 100px; background: radial-gradient(circle, #1f3a93 0%, transparent 70%); top: 60%; left: 25%; }
+        .bg-shape-4 { width: 80px; height: 80px; background: radial-gradient(circle, #1f3a93 0%, transparent 70%); top: 30%; right: 25%; }
+
+        /* Register card */
+        .register-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .register-header h2 {
+            color: #1f3a93;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .register-header p {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            border: 1px solid #ccc;
+        }
+        .btn-register {
+            background-color: #1f3a93;
+            color: #fff;
+            width: 100%;
+            padding: 0.65rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .btn-register:hover {
+            background-color: #3754b2;
+        }
+        .input-icon { background-color: #f1f3f6; border: none; }
+        .toggle-password { background-color: #f1f3f6; border: none; cursor: pointer; }
+
+        .role-selector { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+        .role-option { flex: 1; text-align: center; padding: 0.8rem; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .role-option.active { border-color: #1f3a93; background-color: rgba(31, 58, 147, 0.08); }
+        .role-option input { display: none; }
+
+        .password-strength { height: 5px; border-radius: 5px; margin-top: 4px; transition: width 0.3s, background-color 0.3s; }
+        .terms-check { display: flex; align-items: flex-start; margin-bottom: 1rem; }
+        .terms-check input { margin-top: 0.3rem; margin-right: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand logo" href="{% url 'main' %}">
+                    <i class="fas fa-briefcase"></i> እናት Jobs
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                        <li class="nav-item"><a class="nav-link" href="{% url 'main' %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'browse_jobs' %}">Find Jobs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'compaines' %}">Companies</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'aboutus' %}">About Us</a></li>
+                        <li class="nav-item nav-btns d-flex mt-2 mt-lg-0">
+                            <a class="btn btn-outline btn-nav" href="{% url 'login' %}">Log In</a>
+                            <a class="btn btn-primary btn-nav" href="{% url 'register' %}">Sign Up</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Background shapes -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+    <div class="bg-shape bg-shape-4"></div>
+
+    <!-- Register card -->
+    <div class="register-card">
+        <div class="register-header">
+            <h2><i class="fas fa-user-plus me-1"></i>Create Account</h2>
+            <p>Join our community today</p>
+        </div>
+
+        <form method="POST" id="registerForm">
+            {% csrf_token %}
+            <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" name="username" placeholder="Choose a username" required>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password1" name="password1" placeholder="Create password" required minlength="3">
+                    <span class="input-group-text toggle-password" data-target="password1"><i class="fas fa-eye"></i></span>
+                </div>
+                <div class="password-strength" id="passwordStrength"></div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Confirm Password</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm password" required>
+                    <span class="input-group-text toggle-password" data-target="password2"><i class="fas fa-eye"></i></span>
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Register As</label>
+                <div class="role-selector">
+                    <label class="role-option active" id="jobseekerOption">
+                        <input type="radio" name="role" value="jobseeker" checked>
+                        <i class="fas fa-user-graduate fa-2x text-primary mb-1"></i>
+                        <div>Job Seeker</div>
+                    </label>
+                    <label class="role-option" id="employerOption">
+                        <input type="radio" name="role" value="employer">
+                        <i class="fas fa-briefcase fa-2x text-primary mb-1"></i>
+                        <div>Employer</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="terms-check">
+                <input type="checkbox" name="terms" id="terms" required>
+                <label class="small">I agree to the <a href="#" class="text-primary">Terms</a> and <a href="#" class="text-primary">Privacy Policy</a></label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-register mb-2"><i class="fas fa-user-plus me-1"></i>Create Account</button>
+
+            <div class="text-center text-muted">
+                Already have an account? <a href="{% url 'login' %}" class="text-primary fw-semibold">Sign in</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password toggle
+        document.querySelectorAll('.toggle-password').forEach(el => {
+            el.addEventListener('click', () => {
+                const target = document.getElementById(el.dataset.target);
+                const type = target.type === 'password' ? 'text' : 'password';
+                target.type = type;
+                el.querySelector('i').classList.toggle('fa-eye');
+                el.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        });
+
+        // Role selection
+        const jobseeker = document.getElementById('jobseekerOption');
+        const employer = document.getElementById('employerOption');
+        jobseeker.addEventListener('click', () => {
+            jobseeker.classList.add('active');
+            employer.classList.remove('active');
+            jobseeker.querySelector('input').checked = true;
+        });
+        employer.addEventListener('click', () => {
+            employer.classList.add('active');
+            jobseeker.classList.remove('active');
+            employer.querySelector('input').checked = true;
+        });
+
+        // Password strength
+        document.getElementById('password1').addEventListener('input', function() {
+            const pwd = this.value;
+            let strength = 0;
+            if(pwd.length >= 8) strength++;
+            if(/[A-Z]/.test(pwd)) strength++;
+            if(/\d/.test(pwd)) strength++;
+            if(/[^A-Za-z0-9]/.test(pwd)) strength++;
+            const bar = document.getElementById('passwordStrength');
+            bar.style.width = (strength/4*100) + '%';
+            bar.style.backgroundColor = strength < 2 ? '#dc3545' : strength < 4 ? '#ffc107' : '#28a745';
+        });
+    </script>
+</body>
+</html>
