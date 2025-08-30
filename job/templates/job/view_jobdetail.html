@@ -8,7 +8,7 @@
 }
 
 .logo-animate:hover {
-    transform: scale(1.1) rotate(-5deg); /* pop + slight rotation */
+    transform: scale(1.1) rotate(5deg); /* pop + slight rotation */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 }
@@ -47,7 +47,7 @@
                <img src="{{ job.employer.logo.url }}" alt="Company Logo" 
      class="rounded-circle logo-animate" width="120" height="120">
                     <div class="flex-grow-1">
-                        <h3 class="mb-1">{{ job.employer.user|title }}</h3>
+                        <h3 class="mb-1">{{ job.employer.comapany_name|title }}</h3>
 
                         <!-- About Company Truncated -->
                         <p class="text-muted small company-about" style="max-height: 6em; overflow: hidden;">
@@ -81,6 +81,11 @@
                     <div class="d-flex flex-wrap gap-3 mb-3 text-muted small">
                         <span><i class="fas fa-map-marker-alt text-danger me-1"></i>{{ job.location }}</span>
                         <span><i class="fas fa-tag text-success me-1"></i>{{ job.category.name }}</span>
+                       {% for skill in job.required_skills.all %}
+    <span><i class="fas fa-tag text-success me-1"></i>{{ skill.name }}</span>
+{% empty %}
+    <span>No skills listed</span>
+{% endfor %}
                         <span><i class="fas fa-money-bill-wave text-success me-1"></i>{{ job.salary_range }}</span>
                         <span class="badge bg-info text-dark">{{ job.job_type }}</span>
                     </div>

@@ -25,7 +25,15 @@
                         
                         {% endif %}
                         <div>
-                            <h3 class="h5 mb-1">{{ company.comapany_name }}</h3>
+                            <div class="d-flex align-items-center">
+                                <h3 class="h5 mb-1 me-2">{{ company.comapany_name }}</h3>
+                                <!-- Verified Badge -->
+                                {% if not company.is_verified %}
+                                <span class="verified-badge" data-bs-toggle="tooltip" title="Verified Company">
+                                    <i class="fas fa-check-circle text-primary"></i>
+                                </span>
+                                {% endif %}
+                            </div>
                             </a>
                             {% if company.website %}
                             <a href="{{ company.website }}" target="_blank" class="text-decoration-none small text-muted">
@@ -156,6 +164,21 @@
     .company-card:hover .company-logo img {
         transform: scale(1.1);
     }
+    .verified-badge {
+        font-size: 16px;
+        display: inline-flex;
+        align-items: center;
+    }
 </style>
+
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 
 {% endblock %}

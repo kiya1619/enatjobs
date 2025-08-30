@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -676,8 +677,11 @@
     <header>
         <nav class="navbar">
             <a href="{% url 'main' %}" class="logo">
-                <i class="fas fa-briefcase"></i>
-                <span>JobPortal</span>
+                <a class="navbar-brand logo d-flex align-items-center" href="{% url 'main' %}">
+    <img src="{% static 'jobs/images/enat.png' %}" alt="እናት Jobs" style="height: 40px; width: auto; margin-right: 8px;">
+    <span>እናት Jobs</span>
+</a>
+
             </a>
             
             <div class="nav-links">

@@ -34,7 +34,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
@@ -179,8 +179,11 @@
                                     <div class="avatar-placeholder-sm bg-light rounded-circle me-2">
                                         <i class="fas fa-user text-muted"></i>
                                     </div>
-                                    <div>{{ app.applicant.username }}</div>
-                                </div>
+                        {% if app.applicant.seekerprofile %}
+                            <div>{{ app.applicant.seekerprofile.first_name | upper }} {{ app.applicant.seekerprofile.last_name |upper }}</div>
+                        {% else %}
+                            <div>{{ app.applicant.username }}</div>
+                        {% endif %}                                </div>
                             </td>
                             <td>{{ app.job.title }}</td>
                             <td>{{ app.applied_on|date:"M d, Y" }}</td>

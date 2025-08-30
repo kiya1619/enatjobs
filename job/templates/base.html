@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,9 +100,10 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
-                <a class="navbar-brand logo" href="{% url 'main' %}">
-                    <i class="fas fa-briefcase"></i> እናት Jobs
-                </a>
+               <a class="navbar-brand logo" href="{% url 'main' %}">
+    <img src="{% static 'jobs/images/enat.png' %}" alt="እናት Jobs" style="height: 40px; width: auto; margin-right: 8px;">
+    እናት Jobs
+</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>

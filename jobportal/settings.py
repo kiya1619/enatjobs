@@ -25,9 +25,19 @@ SECRET_KEY = 'django-insecure-xxjf5t68v46^a4hm5nr_mgl74)17j$k+2qkr0yz78$-l1+29sh
 # SECURITY Fas: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Render assigns a domain automatically
 
 import os
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Optional: keep using your app-level static folder
+STATICFILES_DIRS = [
+    BASE_DIR / "job" / "static",  # adjust if needed
+]
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -95,13 +105,14 @@ TEMPLATES = [
     },
 ]
 # Set session timeout (in seconds)
-SESSION_COOKIE_AGE = 300  # 30 minutes
+SESSION_COOKIE_AGE = 1200  # 30 minutes
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # optional: expire when browser closes
 
 MIDDLEWARE += ['job.middleware.AutoLogoutMiddleware']
-AUTO_LOGOUT_DELAY = 300  # 30 minutes
+AUTO_LOGOUT_DELAY = 1200  # 30 minutes
 WSGI_APPLICATION = 'jobportal.wsgi.application'
 
+STATIC_URL = '/static/'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

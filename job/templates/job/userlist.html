@@ -19,6 +19,14 @@
 
 <div class="user-management-container">
     <h2 class="table-header">User Management</h2>
+      {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
     <table class="user-table">
         <thead>
             <tr>
@@ -34,7 +42,7 @@
                 <td>{{ user.username }}</td>
                 <td>
                     <span class="role-badge {% if user.is_job_seeker %}job-seeker {% elif user.is_job_employer %}job-employer {% else %}admin{% endif %}">
-                        {% if user.is_job_seeker %}Job Seeker{% elif user.is_job_employer %}Employer{% else %}Admin{% endif %}
+                        {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
                     </span>
                 </td>
                 <td>{{ user.email }}</td>

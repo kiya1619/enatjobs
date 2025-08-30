@@ -128,6 +128,7 @@ def employer_dashboard(request):
     }
     return render(request, 'job/employer_dashboard.html',context)
 @role_required('job_seeker')
+
 def job_seeker_dashboard(request):
     user = request.user
     try:
@@ -136,30 +137,45 @@ def job_seeker_dashboard(request):
         messages.warning(request, "Please complete your profile to get job recommendations.")
         return redirect('seeker_profile')
 
-    # 1. Get job IDs the user already applied for
     applied_jobs = JobApplication.objects.filter(applicant=user).values_list('job_id', flat=True)
 
-    # 2. Fetch only active jobs, exclude applied ones
+    # Fetch only active jobs
     jobs = Job.objects.filter(
         is_active=True,
         deadline__gte=timezone.now().date()
     ).exclude(id__in=applied_jobs)
 
-    # 3. Annotate skill matches
-    jobs = jobs.annotate(
-        skill_match_count=Count(
-            'required_skills',
-            filter=Q(required_skills__in=seeker_profile.skills.all())
-        )
-    )
+    seeker_skills = seeker_profile.skills.all()
 
-    # 4. Calculate location match & total score
+    recommended_jobs = []
+
     for job in jobs:
-        job.location_match = 1 if seeker_profile.location and job.location.lower() in seeker_profile.location.lower() else 0
-        job.total_score = job.skill_match_count * 2 + job.location_match
+        job_skills = job.required_skills.all()
+        if job_skills.exists() and seeker_skills.exists():
+            # count the number of matched skills
+            matched_skills = job_skills.filter(id__in=seeker_skills.values_list('id', flat=True))
+            skill_match_count = matched_skills.count()
+            skill_match_ratio = skill_match_count / job_skills.count()  # percentage match
+        else:
+            skill_match_count = 0
+            skill_match_ratio = 0
 
-    # 5. Sort jobs by total_score descending
-    recommended_jobs = sorted(jobs, key=lambda j: j.total_score, reverse=True)
+        # location match: more exact
+        location_match = 1 if seeker_profile.location and seeker_profile.location.lower() in job.location.lower() else 0
+
+        # total score: you can tweak weights
+        total_score = skill_match_ratio * 2 + location_match
+
+        # attach attributes for template
+        job.skill_match_count = skill_match_count
+        job.skill_match_ratio = round(skill_match_ratio * 100)  # as %
+        job.location_match = location_match
+        job.total_score = total_score
+
+        recommended_jobs.append(job)
+
+    # Sort by total_score descending
+    recommended_jobs = sorted(recommended_jobs, key=lambda j: j.total_score, reverse=True)
 
     context = {
         'user': user,
@@ -177,60 +193,100 @@ from django.db.models import Value, CharField
 from django.db.models.functions import Replace, Lower
 from django.shortcuts import render
 
+
 def browse_jobs(request):
-    applied_jobs = []
-    saved_jobs = []
-
-    if request.user.is_authenticated:
-        saved_jobs = request.user.savedjob_set.values_list('job_id', flat=True)
-        applied_jobs = JobApplication.objects.filter(applicant=request.user).values_list('job_id', flat=True)
-
-    # Get search parameters
+    # Get filters from GET parameters
     search_query = request.GET.get('search', '')
     location_query = request.GET.get('location', '')
     category_query = request.GET.get('category', '')
+    job_type_query = request.GET.get('job_type', '')
+    sort_query = request.GET.get('sort', 'newest')  # default sorting
 
-
-    # Start with active jobs
+    # Base queryset: active jobs with valid deadlines
     jobs = Job.objects.filter(deadline__gte=timezone.now(), is_active=True)
 
-    # Apply search filters
+    # Apply basic search filters
     if search_query:
-        normalized_query = search_query.replace(" ", "").lower()
-        jobs = jobs.annotate(
-            clean_title=Replace(Lower("title"), Value(" "), Value(""), output_field=CharField()),
-            clean_description=Replace(Lower("description"), Value(" "), Value(""), output_field=CharField()),
-            clean_employer=Replace(Lower("employer__comapany_name"), Value(" "), Value(""), output_field=CharField()),
-            clean_location=Replace(Lower("location"), Value(" "), Value(""), output_field=CharField()),
-            clean_category=Replace(Lower("category__name"), Value(" "), Value(""), output_field=CharField()),
-        ).filter(
-            models.Q(clean_title__icontains=normalized_query) |
-            models.Q(clean_description__icontains=normalized_query) |
-            models.Q(clean_employer__icontains=normalized_query) |
-            models.Q(clean_location__icontains=normalized_query) |
-            models.Q(clean_category__icontains=normalized_query)
+        jobs = jobs.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(location__icontains=search_query) |
+            Q(category__name__icontains=search_query)
         )
-
     if location_query:
         jobs = jobs.filter(location__icontains=location_query)
     if category_query:
         jobs = jobs.filter(category_id=category_query)
-    # Order by most recent
-    jobs = jobs.order_by('-posted_on')
+    if job_type_query:
+        type_map = {
+            "full_time": "full-time",
+            "part_time": "part-time",
+            "internship": "internship",
+            "contract": "contract",
+        }
+        mapped_type = type_map.get(job_type_query)
+        if mapped_type:
+            jobs = jobs.filter(job_type=mapped_type)
 
-    # Pagination (9 jobs per page)
-    paginator = Paginator(jobs, 9)
+    # Relevance sorting: skill + location
+    if sort_query == "relevance" and request.user.is_authenticated:
+        try:
+            seeker_profile = request.user.seekerprofile
+            seeker_skills = seeker_profile.skills.all()
+            
+            job_list = []
+
+            for job in jobs:
+                job_skills = job.required_skills.all()
+                if job_skills.exists() and seeker_skills.exists():
+                    matched_skills = job_skills.filter(id__in=seeker_skills.values_list('id', flat=True))
+                    skill_match_ratio = matched_skills.count() / job_skills.count()
+                else:
+                    skill_match_ratio = 0
+
+                # Location match
+                location_match = 1 if seeker_profile.location and seeker_profile.location.lower() in job.location.lower() else 0
+
+                # Total score (weights: skills * 2 + location)
+                total_score = skill_match_ratio * 2 + location_match
+
+                # Attach attributes for template display
+                job.skill_match_ratio = round(skill_match_ratio * 100)  # for display
+                job.location_match = location_match
+                job.total_score = total_score
+
+                job_list.append(job)
+
+            # Sort by total_score descending, ties broken by newest
+            job_list = sorted(job_list, key=lambda j: (j.total_score, j.posted_on.timestamp()), reverse=True)
+
+        except AttributeError:
+            # fallback if user has no profile
+            job_list = jobs.order_by('-posted_on')
+    else:
+        # default sorting: newest first
+        job_list = jobs.order_by('-posted_on')
+
+    # Pagination
+    paginator = Paginator(job_list, 9)
     page_number = request.GET.get('page')
     jobs_page = paginator.get_page(page_number)
-
+    if request.user.is_authenticated:
+        applied_jobs_ids = set(
+        JobApplication.objects.filter(applicant=request.user, job__in=job_list)
+        .values_list('job_id', flat=True)
+    )
+    else:
+        applied_jobs_ids = set()  # empty set for anonymous users
     context = {
         'jobs': jobs_page,
         'search_query': search_query,
         'location_query': location_query,
-        'total_jobs': jobs.count(),
-        'applied_jobs': applied_jobs,
-        'saved_jobs': saved_jobs,
-        'categories': JobCategory.objects.all(), 
+        'category_query': category_query,
+        'job_type_query': job_type_query,
+        'sort_query': sort_query,
+        'categories': JobCategory.objects.all(),
+        'applied_jobs_ids':applied_jobs_ids
     }
 
     return render(request, 'job/browse_jobs.html', context)
@@ -817,24 +873,33 @@ def expired_jobs(request):
     return render(request, 'job/expired_jobs.html', context)
 @role_required('job_seeker')
 def saved_jobs(request):
-    saved_jobs_list = SavedJob.objects.all()
+    saved_jobs_list = SavedJob.objects.filter(
+        user=request.user,
+        job__isnull=False  # ensures the job still exists
+    ).select_related('job', 'job__employer', 'job__category')
+
     context = {
         'saved_jobs': saved_jobs_list
     }
-    return render(request, 'job/saved_jobs.html', context)
-    
-
+    return render(request, 'job/saved_jobs.html', context)  
 
 def toggle_save_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
+
     saved_job, created = SavedJob.objects.get_or_create(user=request.user, job=job)
 
     if not created:
         # Already exists → unsave
         saved_job.delete()
+        action = 'unsaved'
+    else:
+        action = 'saved'
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'saved': action == 'saved'})
+    
+    # Fallback for normal requests
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
 
 def company_job_list(request, id):
     company = get_object_or_404(EmployerProfile, id=id)
