@@ -12,17 +12,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
-        position: relative;
-        overflow: hidden;
-        padding-top: 80px; /* space for navbar */
-    }
+   body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+    position: relative;
+    overflow-x: hidden;
+    padding: 100px 0 50px; /* top + bottom padding for navbar + spacing */
+}
+.login-card {
+    margin: 0 auto;
+}
 
     /* Navbar */
     nav.navbar {
@@ -38,6 +40,12 @@
         color: #2563eb;
         text-decoration: none;
     }
+    @media (max-width: 576px) {
+    .login-card {
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+}
     .navbar-brand.logo i { font-size: 1.8rem; }
     .nav-btns .btn-nav { margin-left: 0.5rem; }
 
