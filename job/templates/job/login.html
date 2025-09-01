@@ -1,7 +1,16 @@
-{% extends "base.html" %}
-{% block title %}Login | Job Portal{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | እናት Jobs</title>
 
-{% block extra_head %}
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,29 +24,24 @@
         padding-top: 80px; /* space for navbar */
     }
 
-    /* Background elements */
-    body::before {
-        content: "";
-        position: absolute;
-        top: -50px;
-        left: -50px;
-        width: 200px;
-        height: 200px;
-        background: rgba(31, 58, 147, 0.1);
-        border-radius: 50%;
-        z-index: -1;
+    /* Navbar */
+    nav.navbar {
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    body::after {
-        content: "";
-        position: absolute;
-        bottom: -80px;
-        right: -80px;
-        width: 300px;
-        height: 300px;
-        background: rgba(31, 58, 147, 0.1);
-        border-radius: 50%;
-        z-index: -1;
+    .navbar-brand.logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2563eb;
+        text-decoration: none;
     }
+    .navbar-brand.logo i { font-size: 1.8rem; }
+    .nav-btns .btn-nav { margin-left: 0.5rem; }
+
+    /* Background circles */
     .bg-circle {
         position: absolute;
         border-radius: 50%;
@@ -81,22 +85,49 @@
     .divider::before { left: 0; }
     .divider::after { right: 0; }
 </style>
-{% endblock %}
+</head>
+<body>
 
-{% block content %}
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container">
+        <a class="navbar-brand logo" href="{% url 'main' %}">
+            <img src="{% static 'jobs/images/enat.png' %}" alt="እናት Jobs" style="height: 40px; width: auto;">
+            እናት Jobs
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="{% url 'main' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'browse_jobs' %}">Find Jobs</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'compaines' %}">Companies</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'aboutus' %}">About Us</a></li>
+                <li class="nav-item nav-btns d-flex mt-2 mt-lg-0">
+                    <a class="btn btn-outline btn-nav" href="{% url 'login' %}">Log In</a>
+                    <a class="btn btn-primary btn-nav" href="{% url 'register' %}">Sign Up</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Background circles -->
 <div class="bg-circle bg-circle-1"></div>
 <div class="bg-circle bg-circle-2"></div>
 <div class="bg-circle bg-circle-3"></div>
 <div class="bg-circle bg-circle-4"></div>
 
+<!-- Login card -->
 <div class="login-card">
     <div class="login-header">
         {% if messages %}
-        <div>
-            {% for message in messages %}
-                <div class="alert alert-danger">{{ message }}</div>
-            {% endfor %}
-        </div>
+            <div>
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            </div>
         {% endif %}
         <h2><i class="fas fa-user-circle me-1"></i>Welcome Back</h2>
         <p>Sign in to your account</p>
@@ -104,8 +135,6 @@
 
     <form method="POST" id="loginForm">
         {% csrf_token %}
-
-        <!-- Username -->
         <div class="mb-3">
             <label for="username" class="form-label fw-semibold">Username</label>
             <div class="input-group">
@@ -114,7 +143,6 @@
             </div>
         </div>
 
-        <!-- Password -->
         <div class="mb-3">
             <label for="password" class="form-label fw-semibold">Password</label>
             <div class="input-group">
@@ -124,7 +152,6 @@
             </div>
         </div>
 
-        <!-- Remember & Forgot -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="remember" name="remember">
@@ -133,13 +160,10 @@
             <a href="#" class="text-decoration-none">Forgot password?</a>
         </div>
 
-        <!-- Submit -->
         <button type="submit" class="btn btn-login mb-3"><i class="fas fa-sign-in-alt me-1"></i>Login</button>
 
-        <!-- Divider -->
         <div class="divider">OR</div>
 
-        <!-- Social Login -->
         <div class="text-center mb-3">
             <p class="text-muted mb-2">Continue with</p>
             <a href="#" class="btn btn-outline-primary me-2"><i class="fab fa-google"></i></a>
@@ -147,17 +171,15 @@
             <a href="#" class="btn btn-outline-primary"><i class="fab fa-linkedin-in"></i></a>
         </div>
 
-        <!-- Register -->
         <div class="text-center text-muted">
-            <p class="mb-0">Don't have an account? 
-                <a href="{% url 'register' %}">Sign up</a>
-            </p>
+            <p class="mb-0">Don't have an account? <a href="{% url 'register' %}">Sign up</a></p>
         </div>
     </form>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     const togglePassword = document.getElementById('togglePassword');
     togglePassword.addEventListener('click', () => {
@@ -168,16 +190,6 @@
         togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
     });
 </script>
-{% endblock %}
-<!-- Navbar (in base.html) -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">
-                <i class="fas fa-briefcase me-2"></i>JobPortal
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav
+
+</body>
+</html>
