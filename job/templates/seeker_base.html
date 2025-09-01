@@ -15,12 +15,13 @@
         body {
             padding-top: 70px; /* space for fixed navbar */
             background-color: #f8f9fa;
-            -webkit-font-smoothing:antialiased;
+            -webkit-font-smoothing: antialiased;
         }
 
         .navbar {
             background: linear-gradient(90deg, #4b6cb7, #182848);
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 0.5rem 0;
         }
 
         .navbar-brand {
@@ -29,6 +30,16 @@
             color: #fff !important;
             display: flex;
             align-items: center;
+            margin-right: 1rem;
+        }
+        
+        .navbar-nav .nav-link {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
         }
 
         .navbar .nav-link, .navbar .navbar-brand {
@@ -37,6 +48,7 @@
 
         .navbar .nav-link:hover {
             color: #ffd700 !important;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .profile-img {
@@ -47,15 +59,24 @@
             margin-right: 8px;
         }
 
-        .nav-item { margin: 0 4px; }
+        .nav-item { 
+            margin: 0 2px; 
+        }
+        
+        .nav-item.dropdown .dropdown-toggle::after {
+            margin-left: 0.4rem;
+        }
 
         .btn-outline-light {
             border-color: #fff;
             color: #fff;
+            transition: all 0.2s ease;
         }
+        
         .btn-outline-light:hover {
             background-color: #fff;
             color: #182848;
+            transform: translateY(-1px);
         }
 
         /* Notification dropdown */
@@ -64,49 +85,190 @@
             max-height: 400px;
             overflow-y: auto;
         }
+        
         .notification-item {
             border-left: 3px solid transparent;
             transition: all 0.15s ease;
         }
+        
         .notification-item:hover {
             background-color: #f8f9fa;
             border-left-color: #0d6efd;
         }
+        
         .notification-item.unread {
             background-color: #f0f7ff;
             border-left-color: #0d6efd;
         }
+        
         .notification-time {
             font-size: 0.75rem;
             color: #6c757d;
         }
+        
         .notification-content {
             white-space: normal;
             line-height: 1.4;
         }
-        .mark-all-read { cursor: pointer; }
-        .mark-all-read:hover { color: #0a58ca !important; }
+        
+        .mark-all-read { 
+            cursor: pointer; 
+            transition: color 0.2s ease;
+        }
+        
+        .mark-all-read:hover { 
+            color: #0a58ca !important; 
+        }
 
-        /* small visual niceties for cards / content */
-        .job-card { border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        /* Mobile menu improvements */
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
 
-        /* --- Responsive tweaks --- */
+        /* Dropdown improvements */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 1.2rem;
+        }
+        
+        .dropdown-divider {
+            margin: 0.4rem 0;
+        }
+
+        /* Badge improvements */
+        .badge {
+            font-size: 0.6rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        /* --- Responsive improvements --- */
+        @media (max-width: 1200px) {
+            .navbar-nav .nav-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.95rem;
+            }
+        }
+
         @media (max-width: 992px) {
-            .notification-dropdown { width: 320px; }
+            .notification-dropdown { 
+                width: 320px; 
+            }
+            
+            .navbar-collapse {
+                max-height: calc(100vh - 70px);
+                overflow-y: auto;
+                padding: 1rem 0;
+                margin-top: 0.5rem;
+                background: linear-gradient(90deg, #4b6cb7, #182848);
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .navbar-nav {
+                padding: 0.5rem 0;
+            }
+            
+            .nav-item {
+                margin: 0.2rem 0;
+            }
+            
+            .dropdown-menu {
+                margin-left: 1rem;
+                width: calc(100% - 2rem);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .notification-dropdown {
+                width: 100%;
+                max-width: 100%;
+                position: fixed;
+                left: 0;
+                right: 0;
+                margin: 0;
+                border-radius: 0;
+            }
         }
 
         @media (max-width: 576px) {
-            body { padding-top: 56px; }
-            .navbar-brand { font-size: 1.1rem; }
-            .nav-link { font-size: 0.95rem; padding-left: .4rem; padding-right: .4rem; }
-            .notification-dropdown { width: 100vw; right: 0; left: 0; margin: 0; border-radius: 0; }
-            .dropdown-menu-end { right: 0; left: auto; }
-            .navbar .container { padding-left: 0.5rem; padding-right: 0.5rem; }
-            .btn-outline-light { padding: .35rem .5rem; font-size: .9rem; }
+            body { 
+                padding-top: 60px; 
+            }
+            
+            .navbar {
+                padding: 0.4rem 0;
+            }
+            
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            
+            .navbar-brand img {
+                height: 30px;
+            }
+            
+            .nav-link { 
+                font-size: 0.95rem; 
+                padding: 0.4rem 0.5rem;
+            }
+            
+            .btn-outline-light { 
+                padding: .35rem .5rem; 
+                font-size: .9rem; 
+                margin: 0.2rem 0;
+            }
+            
+            .profile-img {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .dropdown-menu {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Animation for dropdowns */
+        .dropdown-menu {
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ensure images scale */
-        img { max-width: 100%; height: auto; display: block; }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+            display: block; 
+        }
     </style>
 </head>
 <body>
@@ -133,9 +295,6 @@
                                 <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                             {% elif user.is_job_seeker %}
                                 <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
-                                <li class="nav-item">
-                        <a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-search me-1"></i> Job Search</a>
-                    </li>
                             {% elif user.is_employer %}
                                 <a class="nav-link" href="{% url 'employer_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                             {% endif %}
@@ -143,16 +302,20 @@
                             <a class="nav-link" href="{% url 'main' %}"><i class="fas fa-home me-1"></i> Home</a>
                         {% endif %}
                     </li>
+                    
+                    {% if user.is_authenticated and user.is_job_seeker %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-search me-1"></i> Job Search</a>
+                        <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-search me-1"></i> Job Search</a>
                     </li>
+                    {% endif %}
+                   
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'compaines' %}"><i class="fas fa-building me-1"></i> Companies</a>
                     </li>
                 </ul>
 
                 <!-- Right links -->
-                <ul class="navbar-nav ms-auto align-items-center">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
                     {% if user.is_authenticated %}
                         {% if user.is_superuser %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a></li>
@@ -169,7 +332,7 @@
                               </ul>
                             </li>
                         {% elif user.is_job_seeker %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-list me-1"></i> Browse Jobs</a></li>
+                            <li class="nav-item d-none d-lg-block"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-list me-1"></i> Browse Jobs</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'myapplications' %}"><i class="fas fa-file-alt me-1"></i> My Applications</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'saved_jobs' %}"><i class="far fa-heart me-1"></i> Saved Jobs</a></li>
                         {% elif user.is_employer %}
@@ -178,10 +341,11 @@
                         {% endif %}
 
                         <!-- Notifications -->
-                        <li class="nav-item dropdown me-2">
+                        <li class="nav-item dropdown me-lg-2">
                             <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
-                               <i class="fas fa-bell me-1"></i> Notifications
+                               <i class="fas fa-bell me-1"></i> 
+                               <span class="d-lg-none">Notifications</span>
                                 {% if notifications_unread_count > 0 %}
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         {{ notifications_unread_count }}
@@ -211,6 +375,9 @@
                                 {% endfor %}
 
                                 <li><hr class="dropdown-divider my-1"></li>
+                                <li class="px-3 py-2">
+                                    <a href="" class="btn btn-outline-primary w-100">View All Notifications</a>
+                                </li>
                             </ul>
                         </li>
 
@@ -219,14 +386,24 @@
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {% if user.seekerprofile %}
                                     <img src="{{ user.seekerprofile.avatar.url }}" alt="Profile" class="profile-img me-1" onerror="this.style.display='none'">
-                                    <span>{{ user.seekerprofile.first_name|title }} {{ user.seekerprofile.last_name|title }}</span>
+                                    <span class="d-none d-lg-inline">{{ user.seekerprofile.first_name|title }} {{ user.seekerprofile.last_name|title }}</span>
                                 {% elif user.employerprofile %}
-                                    <span>{{ user.employerprofile.comapany_name|title }}</span>
+                                    <span class="d-none d-lg-inline">{{ user.employerprofile.comapany_name|title }}</span>
                                 {% else %}
-                                    <span>{{ user.username|title }}</span>
+                                    <span class="d-none d-lg-inline">{{ user.username|title }}</span>
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                <li class="dropdown-header d-lg-none">
+                                    {% if user.seekerprofile %}
+                                        {{ user.seekerprofile.first_name|title }} {{ user.seekerprofile.last_name|title }}
+                                    {% elif user.employerprofile %}
+                                        {{ user.employerprofile.comapany_name|title }}
+                                    {% else %}
+                                        {{ user.username|title }}
+                                    {% endif %}
+                                </li>
+                                <li><hr class="dropdown-divider d-lg-none"></li>
                                 {% if user.is_job_seeker %}
                                     <li><a class="dropdown-item" href="{% url 'seeker_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
                                 {% elif user.is_employer %}
@@ -239,7 +416,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a></li>
-                        <li class="nav-item"><a class="btn btn-outline-light" href="{% url 'register' %}"><i class="fas fa-user-plus me-1"></i> Register</a></li>
+                        <li class="nav-item"><a class="btn btn-outline-light ms-lg-2 mt-2 mt-lg-0" href="{% url 'register' %}"><i class="fas fa-user-plus me-1"></i> Register</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -286,10 +463,26 @@
                 .catch(err => console.error('Mark all read failed', err));
             });
         }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const isDropdown = event.target.matches('.dropdown-toggle') || 
+                               event.target.closest('.dropdown-toggle') ||
+                               event.target.matches('.dropdown-item') ||
+                               event.target.closest('.dropdown-item');
+            
+            if (!isDropdown) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+                document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+                    toggle.setAttribute('aria-expanded', 'false');
+                });
+            }
+        });
     });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

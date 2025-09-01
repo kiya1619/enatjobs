@@ -195,6 +195,16 @@ from django.shortcuts import render
 
 
 def browse_jobs(request):
+    # Ethiopian cities for dropdown
+    ethiopian_cities = [
+        "Addis Ababa", "Mekelle", "Gondar", "Adama", "Bahir Dar", "Dire Dawa",
+        "Hawassa", "Jimma", "Shashamane", "Bishoftu", "Sodo", "Arba Minch",
+        "Jijiga", "Hosaena", "Kombolcha", "Dila", "Nekemte", "Debre Birhan",
+        "Debre Markos", "Asella", "Debre Tabor", "Burayu", "Adigrat", "Weldiya",
+        "Shire Inda Selassie", "Bale Robe", "Boditi", "Butajira", "Gambela",
+        "Harar", "Mizan Teferi", "Semera", "Bule Hora", "Welkite", "Wukro"
+    ]
+
     # Get filters from GET parameters
     search_query = request.GET.get('search', '')
     location_query = request.GET.get('location', '')
@@ -205,18 +215,32 @@ def browse_jobs(request):
     # Base queryset: active jobs with valid deadlines
     jobs = Job.objects.filter(deadline__gte=timezone.now(), is_active=True)
 
-    # Apply basic search filters
+    # Space-insensitive search
     if search_query:
-        jobs = jobs.filter(
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(location__icontains=search_query) |
-            Q(category__name__icontains=search_query)
+        normalized_query = search_query.replace(" ", "").lower()
+        jobs = jobs.annotate(
+            title_no_space=Func(F('title'), Value(' '), Value(''), function='REPLACE', output_field=CharField()),
+            description_no_space=Func(F('description'), Value(' '), Value(''), function='REPLACE', output_field=CharField()),
+            location_no_space=Func(F('location'), Value(' '), Value(''), function='REPLACE', output_field=CharField()),
+            company_no_space=Func(F('employer__comapany_name'), Value(' '), Value(''), function='REPLACE', output_field=CharField()),
+            category_no_space=Func(F('category__name'), Value(' '), Value(''), function='REPLACE', output_field=CharField()),
+        ).filter(
+            Q(title_no_space__icontains=normalized_query) |
+            Q(description_no_space__icontains=normalized_query) |
+            Q(location_no_space__icontains=normalized_query) |
+            Q(company_no_space__icontains=normalized_query) |
+            Q(category_no_space__icontains=normalized_query)
         )
+
+    # Location filter (dropdown exact match)
     if location_query:
-        jobs = jobs.filter(location__icontains=location_query)
+        jobs = jobs.filter(location__iexact=location_query)
+
+    # Category filter
     if category_query:
         jobs = jobs.filter(category_id=category_query)
+
+    # Job type filter
     if job_type_query:
         type_map = {
             "full_time": "full-time",
@@ -235,49 +259,46 @@ def browse_jobs(request):
             seeker_skills = seeker_profile.skills.all()
             
             job_list = []
-
             for job in jobs:
                 job_skills = job.required_skills.all()
+                skill_match_ratio = 0
                 if job_skills.exists() and seeker_skills.exists():
                     matched_skills = job_skills.filter(id__in=seeker_skills.values_list('id', flat=True))
                     skill_match_ratio = matched_skills.count() / job_skills.count()
-                else:
-                    skill_match_ratio = 0
 
-                # Location match
                 location_match = 1 if seeker_profile.location and seeker_profile.location.lower() in job.location.lower() else 0
-
-                # Total score (weights: skills * 2 + location)
                 total_score = skill_match_ratio * 2 + location_match
 
-                # Attach attributes for template display
                 job.skill_match_ratio = round(skill_match_ratio * 100)  # for display
                 job.location_match = location_match
                 job.total_score = total_score
 
                 job_list.append(job)
 
-            # Sort by total_score descending, ties broken by newest
+            # Sort by total_score descending, then newest
             job_list = sorted(job_list, key=lambda j: (j.total_score, j.posted_on.timestamp()), reverse=True)
 
         except AttributeError:
-            # fallback if user has no profile
+            # Fallback if user has no profile
             job_list = jobs.order_by('-posted_on')
     else:
-        # default sorting: newest first
+        # Default sorting: newest first
         job_list = jobs.order_by('-posted_on')
 
     # Pagination
     paginator = Paginator(job_list, 9)
     page_number = request.GET.get('page')
     jobs_page = paginator.get_page(page_number)
+
+    # Applied jobs
     if request.user.is_authenticated:
         applied_jobs_ids = set(
-        JobApplication.objects.filter(applicant=request.user, job__in=job_list)
-        .values_list('job_id', flat=True)
-    )
+            JobApplication.objects.filter(applicant=request.user, job__in=job_list)
+            .values_list('job_id', flat=True)
+        )
     else:
-        applied_jobs_ids = set()  # empty set for anonymous users
+        applied_jobs_ids = set()
+
     context = {
         'jobs': jobs_page,
         'search_query': search_query,
@@ -286,7 +307,8 @@ def browse_jobs(request):
         'job_type_query': job_type_query,
         'sort_query': sort_query,
         'categories': JobCategory.objects.all(),
-        'applied_jobs_ids':applied_jobs_ids
+        'applied_jobs_ids': applied_jobs_ids,
+        'ethiopian_cities': ethiopian_cities,
     }
 
     return render(request, 'job/browse_jobs.html', context)
