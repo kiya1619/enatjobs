@@ -133,6 +133,9 @@
                                 <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                             {% elif user.is_job_seeker %}
                                 <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
+                                <li class="nav-item">
+                        <a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-search me-1"></i> Job Search</a>
+                    </li>
                             {% elif user.is_employer %}
                                 <a class="nav-link" href="{% url 'employer_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                             {% endif %}
@@ -140,8 +143,12 @@
                             <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
                         {% endif %}
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-search me-1"></i> Job Search</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'compaines' %}"><i class="fas fa-building me-1"></i> Companies</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-search me-1"></i> Job Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'compaines' %}"><i class="fas fa-building me-1"></i> Companies</a>
+                    </li>
                 </ul>
 
                 <!-- Right links -->

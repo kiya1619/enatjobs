@@ -70,6 +70,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'abdisaworkmail@gmail.com'      # your sender email
 EMAIL_HOST_PASSWORD = 'hokt svfv nkuu qrme'   # or app password if using Gmail
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 MIDDLEWARE = [
@@ -81,6 +82,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'job.middleware.AutoLogoutMiddleware',  # add your middleware here
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # add this line
+
 
 ]
 
