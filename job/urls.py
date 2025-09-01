@@ -15,6 +15,7 @@ urlpatterns = [
     path('browse_jobs/',views.browse_jobs, name='browse_jobs'),
     path('post_jobs/',views.post_jobs, name='post_jobs'),
     path('compaines/',views.compaines, name='compaines'),
+    path('manage_jobs/',views.manage_jobs, name='manage_jobs'),
     path('companies_homepage/',views.companies_homepage, name='companies_homepage'),
     path('myapplications/',views.myapplications, name='myapplications'),
     path('view_applicants/<int:id>',views.view_applicants, name='view_applicants'),
@@ -22,6 +23,7 @@ urlpatterns = [
     path('edit_job/<int:id>',views.edit_job, name='edit_job'),
     path('edit_seeker_profile/<int:id>',views.edit_seeker_profile, name='edit_seeker_profile'),
     path('delete_job/<int:id>',views.delete_job, name='delete_job'),
+    path('delete_job_admin/<int:id>',views.delete_job_admin, name='delete_job_admin'),
     path('apply_job/<int:id>',views.apply_job, name='apply_job'),
     path('myjob/',views.myjob, name='myjob'),
     path('update_application_status/<int:id>',views.update_application_status, name='update_application_status'),
@@ -44,6 +46,7 @@ urlpatterns = [
     path('notifications/read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/mark_all_read/', views.mark_all_notifications_read_ajax, name='mark_all_notifications_read_ajax'),
     path('applications/withdraw/<int:app_id>/', views.withdraw_application, name='withdraw_application'),
+
 
 
 

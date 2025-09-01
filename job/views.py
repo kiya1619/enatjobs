@@ -1059,3 +1059,19 @@ def withdraw_application(request, app_id):
     application.save()
     messages.success(request, f"You have successfully withdrawn your application for {application.job.title}.")
     return redirect('myapplications')
+
+@role_required('admin')
+def manage_jobs(request):
+    jobs = Job.objects.all().order_by('-posted_on')  # newest first
+    context = {
+        'jobs':jobs
+    }
+    return render(request, 'job/manage_jobs.html', context)
+
+
+@role_required('admin')
+def delete_job_admin(request, id):
+    job = get_object_or_404(Job, id=id)
+    job.delete()
+    messages.success(request, "Job deleted successfully.")
+    return redirect('manage_jobs')
