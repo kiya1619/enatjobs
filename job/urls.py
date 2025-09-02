@@ -1,8 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from django.http import HttpResponse
 
-
+def ads_txt(request):
+    return HttpResponse(
+        "google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0",
+        content_type="text/plain"
+    )
 urlpatterns = [
     path('',views.main, name='main'),
     path('register/',views.register, name='register'),
@@ -46,6 +51,7 @@ urlpatterns = [
     path('notifications/read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/mark_all_read/', views.mark_all_notifications_read_ajax, name='mark_all_notifications_read_ajax'),
     path('applications/withdraw/<int:app_id>/', views.withdraw_application, name='withdraw_application'),
+    path("ads.txt", ads_txt, name="ads_txt"),
 
 
 
