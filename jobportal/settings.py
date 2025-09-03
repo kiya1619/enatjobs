@@ -52,8 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'job.apps.JobConfig',  # Correct class name
-
+    'job.apps.JobConfig',  
 ]
 
 # settings.py

@@ -95,7 +95,30 @@ def user_login(request):
             return redirect('admin_dashboard')
 
     return render(request, 'job/login.html')
+@role_required('job_seeker')
+def job_seeker_dashboard(request):
+    seeker = request.user.seekerprofile
 
+    # Recommended jobs based on user's skills
+    user_skills = seeker.skills.all()
+    recommended_jobs = Job.objects.filter(required_skills__in=user_skills).distinct()[:5]
+
+    # Saved jobs
+    saved_jobs = Job.objects.filter(savedjob__user=request.user).distinct()[:5]
+
+    # Applications
+    applications = JobApplication.objects.filter(applicant=request.user).select_related('job')
+    active_applications = JobApplication.objects.filter(
+    applicant=request.user,
+            status__in=['applied', 'reviewed']  # only ongoing applications
+        ).select_related('job')
+    context = {
+        'applications': applications,
+        'recommended_jobs': recommended_jobs,
+        'saved_jobs': saved_jobs,
+        'active_applications':active_applications
+    }
+    return render(request, 'job/job_seeker_dashboard.html', context)
 
 @role_required('employer')
 def employer_dashboard(request):
@@ -129,7 +152,7 @@ def employer_dashboard(request):
     return render(request, 'job/employer_dashboard.html',context)
 @role_required('job_seeker')
 
-def job_seeker_dashboard(request):
+def recommended_jobs(request):
     user = request.user
     try:
         seeker_profile = SeekerProfile.objects.get(user=user)
@@ -181,7 +204,7 @@ def job_seeker_dashboard(request):
         'user': user,
         'recommended_jobs': recommended_jobs,
     }
-    return render(request, 'job/job_seeker_dashboard.html', context)
+    return render(request, 'job/recommended_jobs.html', context)
 def logout_user(request):
     logout(request)
     return redirect('login')

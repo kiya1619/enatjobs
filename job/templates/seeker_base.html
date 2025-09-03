@@ -307,7 +307,9 @@
                         
                         {% if user.is_authenticated and user.is_job_seeker %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-search me-1"></i> Job Search</a>
+<a class="nav-link" href="{% url 'recommended_jobs' %}">
+    <i class="fas fa-star me-1"></i> Recommended Jobs
+</a>
                         </li>
                         {% endif %}
                     
