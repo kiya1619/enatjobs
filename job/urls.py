@@ -40,10 +40,9 @@ urlpatterns = [
     path('delete_job_applications/<int:id>',views.delete_job_applications, name='delete_job_applications'),
     path('admin_dashboard/',views.admin_dashboard, name='admin_dashboard'),
     path('view_application/<int:id>',views.view_application, name='view_application'),
-    path('active_jobs/',views.active_jobs, name='active_jobs'),
+    path('all_jobs_admin/',views.all_jobs, name='all_jobs_admin'),
     path('view_all_applicants_employer/',views.view_all_applicants_employer, name='view_all_applicants_employer'),
     path('saved_jobs/',views.saved_jobs, name='saved_jobs'),
-    path('expired_jobs/',views.expired_jobs, name='expired_jobs'),
     path('job_applied_show_admin/',views.job_applied_show_admin, name='job_applied_show_admin'),
     path('toggle-save-job/<int:job_id>/', views.toggle_save_job, name='toggle_save_job'),
     path('company_job_list/<int:id>/', views.company_job_list, name='company_job_list'),
@@ -55,6 +54,7 @@ urlpatterns = [
     path('notifications/mark_all_read/', views.mark_all_notifications_read_ajax, name='mark_all_notifications_read_ajax'),
     path('applications/withdraw/<int:app_id>/', views.withdraw_application, name='withdraw_application'),
     path("ads.txt", ads_txt, name="ads_txt"),
+    
 
 
 

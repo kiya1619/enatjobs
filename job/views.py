@@ -398,7 +398,12 @@ def myjob(request):
     if not request.user.is_employer:
         return render(request, 'job/myjob.html', {'jobs': Job.objects.none(), 'all_jobs': []})
     
-    all_jobs = Job.objects.filter(employer__user=request.user).order_by('-posted_on')  # For the dropdown
+    today = timezone.now().date()
+    all_jobs = Job.objects.filter(employer__user=request.user).order_by('-posted_on')
+
+    # Precompute is_active
+    for job in all_jobs:
+        job.is_active = job.deadline >= today
 
     # Filter for display
     jobs = all_jobs
@@ -407,8 +412,8 @@ def myjob(request):
         jobs = jobs.filter(id=job_id)
 
     context = {
-        'jobs': jobs,          # Jobs to display
-        'all_jobs': all_jobs,  # All jobs for dropdown
+        'jobs': jobs,
+        'all_jobs': all_jobs,
     }
     return render(request, 'job/myjob.html', context)
 @role_required('employer')
@@ -904,19 +909,18 @@ def delete_job_applications(request, id):
     messages.success(request, "Job application deleted successfully.")
     return redirect('job_applied_show_admin')
 @role_required('admin')
-def active_jobs(request):
-    active = Job.objects.filter(deadline__gte=timezone.now().date())
+def all_jobs(request):
+    all_jobs = Job.objects.all().order_by('-posted_on')
+    active_jobs = all_jobs.filter(deadline__gte=timezone.now().date())
+    expired = all_jobs.filter(deadline__lt=timezone.now().date())
+
     context = {
-        'active_jobs': active
+        'jobs': all_jobs,        # Optional if you need a full list
+        'active_jobs': active_jobs,
+        'expired': expired,
     }
     return render(request, 'job/active_jobs.html', context)
-@role_required('admin')
-def expired_jobs(request):
-    expired = Job.objects.filter(deadline__lt=timezone.now().date())
-    context = {
-        'expired': expired
-    }
-    return render(request, 'job/expired_jobs.html', context)
+
 @role_required('job_seeker')
 def saved_jobs(request):
     saved_jobs_list = SavedJob.objects.filter(
@@ -1128,3 +1132,4 @@ def login_activity_view(request):
         'login_activities': login_activities
     }
     return render(request, 'job/login_activity.html', context)
+
