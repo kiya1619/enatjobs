@@ -14,6 +14,7 @@ urlpatterns = [
     path('login/',views.user_login, name='login'),
     path('job_seeker_dashboard/',views.job_seeker_dashboard, name='job_seeker_dashboard'),
     path('recommended_jobs/',views.recommended_jobs, name='recommended_jobs'),
+    path('user_activity/',views.login_activity_view, name='user_activity'),
     path('employer_dashboard/',views.employer_dashboard, name='employer_dashboard'),
     path('userlist/',views.userlist, name='userlist'),
     path('company_profile/',views.company_profile, name='company_profile'),

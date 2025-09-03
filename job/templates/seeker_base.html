@@ -297,6 +297,8 @@
                                     <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                                 {% elif user.is_job_seeker %}
                                     <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
+                                                                    <li class="nav-item d-none d-lg-block"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-list me-1"></i> Browse Jobs</a></li>
+
                                 {% elif user.is_employer %}
                                     <a class="nav-link" href="{% url 'employer_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                                 {% endif %}
@@ -314,7 +316,6 @@
                         {% endif %}
                     
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'compaines' %}"><i class="fas fa-building me-1"></i> Companies</a>
                         </li>
                     </ul>
 
@@ -335,10 +336,7 @@
                                     <li><a class="dropdown-item" href="{% url 'job_applied_show_admin' %}">Job Applications</a></li>
                                 </ul>
                                 </li>
-                            {% elif user.is_job_seeker %}
-                                <li class="nav-item d-none d-lg-block"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-list me-1"></i> Browse Jobs</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'myapplications' %}"><i class="fas fa-file-alt me-1"></i> My Applications</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'saved_jobs' %}"><i class="far fa-heart me-1"></i> Saved Jobs</a></li>
+                          
                             {% elif user.is_employer %}
                                 <li class="nav-item"><a class="nav-link" href="{% url 'post_jobs' %}"><i class="fas fa-plus-circle me-1"></i> Post Job</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{% url 'view_all_applicants_employer' %}"><i class="fas fa-users me-1"></i> Applicants</a></li>                                <li class="nav-item"><a class="nav-link" href="{% url 'myjob' %}"><i class="fas fa-tasks me-1"></i> My Jobs</a></li>
@@ -409,10 +407,16 @@
                                     </li>
                                     <li><hr class="dropdown-divider d-lg-none"></li>
                                     {% if user.is_job_seeker %}
-                                        <li><a class="dropdown-item" href="{% url 'seeker_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'myapplications' %}"><i class="fas fa-sign-out-alt me-2"></i> My Applications</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'saved_jobs' %}"><i class="fas fa-sign-out-alt me-2"></i> saved jobs</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'compaines' %}"><i class="fas fa-user me-2"></i> Companies</a></li>
+                                                                                <li><a class="dropdown-item" href="{% url 'seeker_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
+
+
                                     {% elif user.is_employer %}
                                         <li><a class="dropdown-item" href="{% url 'company_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
                                     {% endif %}
+                                    <li><a class="dropdown-item" href="{% url 'user_activity'  %}"><i class="fas fa-cog me-2"></i> User activity Log</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>

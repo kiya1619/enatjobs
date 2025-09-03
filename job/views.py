@@ -29,6 +29,7 @@ from job.skills import skills
 from django.db.models import Value, Func, F
 from django.db.models.functions import Replace, Lower
 from django.http import JsonResponse
+from .models import LoginActivity
 
 User = get_user_model()
 
@@ -1118,3 +1119,12 @@ def view_all_applicants_employer(request):
         'jobs': jobs,
     }
     return render(request, 'job/view_all_applicants_employer.html', context)
+@role_required('admin')
+def login_activity_view(request):
+    # Show recent 50 logins
+    login_activities = LoginActivity.objects.select_related('user').order_by('-timestamp')[:50]
+    
+    context = {
+        'login_activities': login_activities
+    }
+    return render(request, 'job/login_activity.html', context)

@@ -172,3 +172,11 @@ class Notification2(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+class LoginActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)  # optional: browser info
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} logged in at {self.timestamp}"
