@@ -91,6 +91,23 @@
     letter-spacing: 0.5px;     /* slightly spaced letters */
     text-transform: uppercase; /* optional for extra emphasis */
 }
+/* Force table responsiveness */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Smaller font + padding on mobile */
+@media (max-width: 576px) {
+    .user-table th, .user-table td {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        white-space: nowrap; /* prevent breaking words awkwardly */
+    }
+    #userSearch {
+        font-size: 0.85rem;
+    }
+}
 
 </style>
 
@@ -109,8 +126,9 @@
     <!-- Search -->
     <input type="text" id="userSearch" placeholder="Search users by username, email, or role...">
 
-    <!-- Table -->
-    <table class="user-table" id="usersTable">
+   <!-- Table -->
+<div class="table-responsive">
+    <table class="table user-table" id="usersTable">
         <thead>
             <tr>
                 <th>Username</th>
@@ -124,15 +142,15 @@
             <tr>
                 <td>{{ user.username }}</td>
                 <td>
-                  <span class="role-badge text-standout">
-    {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
-</span>
-
+                    <span class="text-standout">
+                        {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
+                    </span>
                 </td>
                 <td>{{ user.email }}</td>
                 <td>
                     {% if not user.is_superuser %}
-                    <form method="POST" action="{% url 'delete_user' user.id %}" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                    <form method="POST" action="{% url 'delete_user' user.id %}" 
+                          onsubmit="return confirm('Are you sure you want to delete this user?');">
                         {% csrf_token %}
                         <button type="submit" class="delete-button">Delete</button>
                     </form>
@@ -142,6 +160,7 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 
 <!-- JS for search -->

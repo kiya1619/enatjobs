@@ -6,7 +6,7 @@
     <h2 class="mb-4 text-primary">All Applicants for Your Jobs</h2>
 
     <!-- Filter Section -->
-    <div class="filter-section mb-4 p-3 bg-light rounded">
+    <div class="filter-section mb-3 p-3 bg-light rounded">
         <div class="row g-3">
             <div class="col-md-4">
                 <input type="text" id="searchInput" class="form-control" placeholder="Search by name or email">
@@ -30,15 +30,25 @@
                 </select>
             </div>
             <div class="col-md-2 d-flex align-items-end">
-                <button id="clearFilters" class="btn btn-outline-secondary w-100"><i class="fas fa-refresh me-2"></i>Clear</button>
+                <button id="clearFilters" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-refresh me-2"></i> Clear
+                </button>
             </div>
         </div>
     </div>
 
     <!-- View Toggle -->
-    <div class="d-flex justify-content-end mb-3">
-        <button id="tableViewBtn" class="btn btn-primary btn-sm me-2"><i class="fas fa-table me-1"></i> Table View</button>
-        <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button id="tableViewBtn" class="btn btn-primary btn-sm me-2"><i class="fas fa-table me-1"></i> Table View</button>
+            <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
+        </div>
+        <!-- Export Buttons -->
+        <div class="btn-group">
+            <button id="exportCsv" class="btn btn-outline-success btn-sm"><i class="fas fa-file-csv me-1"></i> CSV</button>
+            <button id="exportExcel" class="btn btn-outline-primary btn-sm"><i class="fas fa-file-excel me-1"></i> Excel</button>
+            <button id="exportPdf" class="btn btn-outline-danger btn-sm"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+        </div>
     </div>
 
     <!-- Card View -->
@@ -54,9 +64,7 @@
                     <h6>{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }} {{ app.applicant.seekerprofile.last_name|default:'' }}</h6>
                     <small class="text-muted">{{ app.applicant.email }}</small>
                     <p class="mt-2 mb-1"><strong>Applied to:</strong> {{ app.job.title }}</p>
-                  <span class="badge bg-secondary">
-    {{ app.status|title }}
-</span>
+                    <span class="badge bg-secondary">{{ app.status|title }}</span>
                 </div>
             </div>
         </div>
@@ -71,8 +79,8 @@
     <!-- Table View -->
     <div id="tableView">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
+            <table class="table table-hover align-middle" id="applicantsTable">
+                <thead class="table-dark">
                     <tr>
                         <th>Applicant</th>
                         <th>Email</th>
@@ -90,11 +98,7 @@
                         data-job="{{ app.job.id }}">
                         <td>{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }} {{ app.applicant.seekerprofile.last_name|default:'' }}</td>
                         <td>{{ app.applicant.email }}</td>
-                        <td>
-                           <span class="badge bg-secondary">
-    {{ app.status|title }}
-</span>
-                        </td>
+                        <td><span class="badge bg-secondary">{{ app.status|title }}</span></td>
                         <td>{{ app.job.title }}</td>
                         <td>{{ app.applied_on|date:"M d, Y" }}</td>
                     </tr>
@@ -105,6 +109,12 @@
     </div>
 
 </div>
+
+<!-- JS Libraries for Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 // Toggle Views
@@ -142,38 +152,27 @@ function applyFilters() {
     const statusValue = statusFilter.value.toLowerCase();
     const jobValue = jobFilter.value;
 
-    // Card view
     document.querySelectorAll('#cardView .applicant-card').forEach(card => {
         const name = card.dataset.name;
         const email = card.dataset.email;
         const status = card.dataset.status;
         const job = card.dataset.job;
-        if ((name.includes(searchText) || email.includes(searchText)) &&
-            (statusValue === 'all' || status === statusValue) &&
-            (jobValue === 'all' || job === jobValue)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = ((name.includes(searchText) || email.includes(searchText)) &&
+                              (statusValue === 'all' || status === statusValue) &&
+                              (jobValue === 'all' || job === jobValue)) ? '' : 'none';
     });
 
-    // Table view
     document.querySelectorAll('#tableView .applicant-row').forEach(row => {
         const name = row.dataset.name;
         const email = row.dataset.email;
         const status = row.dataset.status;
         const job = row.dataset.job;
-        if ((name.includes(searchText) || email.includes(searchText)) &&
-            (statusValue === 'all' || status === statusValue) &&
-            (jobValue === 'all' || job === jobValue)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = ((name.includes(searchText) || email.includes(searchText)) &&
+                             (statusValue === 'all' || status === statusValue) &&
+                             (jobValue === 'all' || job === jobValue)) ? '' : 'none';
     });
 }
 
-// Event listeners
 searchInput.addEventListener('keyup', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
 jobFilter.addEventListener('change', applyFilters);
@@ -184,6 +183,26 @@ clearFilters.addEventListener('click', () => {
     applyFilters();
 });
 
+// Export Functions
+function exportTableToExcel(tableId, filename = 'applicants') {
+    const table = document.querySelector(tableId);
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+    XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+document.getElementById('exportExcel').addEventListener('click', () => {
+    exportTableToExcel('#applicantsTable', 'Applicants');
+});
+document.getElementById('exportCsv').addEventListener('click', () => {
+    exportTableToExcel('#applicantsTable', 'Applicants.csv');
+});
+
+document.getElementById('exportPdf').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.autoTable({ html: '#applicantsTable' });
+    doc.save('Applicants.pdf');
+});
 </script>
 
 {% endblock %}

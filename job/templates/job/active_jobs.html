@@ -28,7 +28,7 @@
         <!-- Active Jobs Table -->
         <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
             <div class="table-responsive">
-                <table id="activeJobsTable" class="table table-striped table-hover">
+                <table id="activeJobsTable" class="table table-striped table-hover nowrap" style="width:100%">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -64,7 +64,7 @@
         <!-- Expired Jobs Table -->
         <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
             <div class="table-responsive">
-                <table id="expiredJobsTable" class="table table-striped table-hover">
+                <table id="expiredJobsTable" class="table table-striped table-hover nowrap" style="width:100%">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -99,28 +99,57 @@
     </div>
 </div>
 
-<!-- DataTables CSS & JS -->
+<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+
+<!-- JS -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    $('#activeJobsTable, #expiredJobsTable').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [10, 25, 50],
-        "order": [[5, "desc"]], // Sort by posted date descending
+    // Initialize active table
+    var activeTable = $('#activeJobsTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        order: [[5, "desc"]],
+        columnDefs: [
+            { responsivePriority: 1, targets: 1 }, // Title always visible
+            { responsivePriority: 2, targets: -1 } // Action always visible
+        ]
+    });
+
+    var expiredTable; // Keep reference
+
+    // Initialize expired table only when its tab is shown
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var target = $(e.target).attr("data-bs-target");
+
+        if (target === "#expired" && !$.fn.dataTable.isDataTable('#expiredJobsTable')) {
+            expiredTable = $('#expiredJobsTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [10, 25, 50],
+                order: [[5, "desc"]],
+                columnDefs: [
+                    { responsivePriority: 1, targets: 1 },
+                    { responsivePriority: 2, targets: -1 }
+                ]
+            });
+        }
+
+        // Force recalculation for the visible table
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust().responsive.recalc();
     });
 });
 </script>
 
 <style>
-.table-responsive {
-    overflow-x: auto;
-}
 .table-danger {
-    opacity: 0.8;
+    opacity: 0.9;
 }
 </style>
-
 {% endblock %}

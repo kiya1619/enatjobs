@@ -2,23 +2,15 @@
 
 {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JS (includes Popper.js) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
-    .stats-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-    }
-    .action-buttons {
-        gap: 0.5rem;
-    }
-    .action-buttons .btn {
-        border-radius: 0.5rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    .stats-card { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .action-buttons { gap: 0.5rem; }
+    .action-buttons .btn { border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .action-buttons .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
     #exportExcel { background: linear-gradient(135deg, #28a745, #218838); border: none; }
     #exportExcel:hover { background: linear-gradient(135deg, #218838, #1e7e34); }
@@ -61,17 +53,17 @@
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
-         {% for stat in stats %}
-    <div class="col-md-3 col-sm-6 mb-3">
-        <div class="card stats-card text-center">
-            <div class="card-body">
-                <i class="fas {{ stat.icon }} fa-2x text-{{ stat.color }} mb-2"></i>
-                <h4 class="text-{{ stat.color }}">{{ stat.count }}</h4>
-                <p class="text-muted mb-0">{{ stat.text }}</p>
+        {% for stat in stats %}
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <i class="fas {{ stat.icon }} fa-2x text-{{ stat.color }} mb-2"></i>
+                    <h4 class="text-{{ stat.color }}">{{ stat.count }}</h4>
+                    <p class="text-muted mb-0">{{ stat.text }}</p>
+                </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
     </div>
 
     <!-- Filter Section -->
@@ -103,85 +95,96 @@
 
     <!-- View Toggle & Export -->
     <div class="d-flex justify-content-end mb-3 action-buttons">
-        <button id="tableViewBtn" class="btn btn-primary btn-sm">
-            <i class="fas fa-table me-1"></i> Table View
-        </button>
-        <button id="cardViewBtn" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-th-large me-1"></i> Card View
-        </button>
-        <button id="exportExcel" class="btn btn-success btn-sm">
-            <i class="fas fa-file-excel me-1"></i> Export to Excel
-        </button>
+        <button id="tableViewBtn" class="btn btn-primary btn-sm"><i class="fas fa-table me-1"></i> Table View</button>
+        <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
+        <button id="exportExcel" class="btn btn-success btn-sm"><i class="fas fa-file-excel me-1"></i> Export to Excel</button>
     </div>
 
     <!-- Card View -->
     <div id="cardView" class="d-none">
         {% if applications %}
-        <div class="row">
-            {% for applicant in applications %}
-            <div class="col-lg-6 col-xl-4 mb-4">
-                <div class="card applicant-card h-100" 
-                     data-name="{{ applicant.applicant.username|lower }}" 
-                     data-email="{{ applicant.applicant.email|lower }}" 
-                     data-status="{{ applicant.status|lower }}">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="applicant-avatar me-3">
-                                {% if applicant.applicant.seekerprofile.first_name %}
-                                    {{ applicant.applicant.seekerprofile.first_name|first|upper }}{{ applicant.applicant.seekerprofile.last_name|first|upper }}
-                                {% else %}
-                                    {{ applicant.applicant.username|first|upper }}
+            <div class="row">
+                {% for applicant in applications %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card applicant-card h-100" 
+                         data-name="{{ applicant.applicant.username|lower }}" 
+                         data-email="{{ applicant.applicant.email|lower }}" 
+                         data-status="{{ applicant.status|lower }}">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="applicant-avatar me-3">
+                                    {% if applicant.applicant.seekerprofile.first_name %}
+                                        {{ applicant.applicant.seekerprofile.first_name|first|upper }}{{ applicant.applicant.seekerprofile.last_name|first|upper }}
+                                    {% else %}
+                                        {{ applicant.applicant.username|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {% if applicant.applicant.seekerprofile %}
+                                            {{ applicant.applicant.seekerprofile.first_name }} {{ applicant.applicant.seekerprofile.last_name }}
+                                        {% else %}
+                                            {{ applicant.applicant.username }}
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ applicant.applicant.email }}</small>
+                                </div>
+                                <span class="status-badge 
+                                    {% if applicant.status == 'accepted' %}bg-success
+                                    {% elif applicant.status == 'rejected' %}bg-danger
+                                    {% elif applicant.status == 'reviewed' %}bg-info
+                                    {% else %}bg-warning text-dark{% endif %}">
+                                    {{ applicant.status|title }}
+                                </span>
+                            </div>
+                            <div class="mb-2"><small class="text-muted"><i class="fas fa-calendar me-1"></i>Applied: {{ applicant.applied_on|date:"M d, Y" }}</small></div>
+                            {% if applicant.applicant.seekerprofile.skills %}
+                            <div class="mb-2">
+                                <small class="text-muted d-block mb-1">Skills:</small>
+                                {% for skill in applicant.applicant.seekerprofile.skills.all %}
+                                    <span class="badge bg-light text-dark">{{ skill.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if applicant.match_score is not None %}
+                            <div class="mb-3">
+                                <small class="text-muted">Match Score: {{ applicant.match_score }}%</small>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-match 
+                                        {% if applicant.match_score >= 75 %}bg-success
+                                        {% elif applicant.match_score >= 50 %}bg-warning
+                                        {% else %}bg-danger{% endif %}" 
+                                        role="progressbar" style="width: {{ applicant.match_score }}%" aria-valuenow="{{ applicant.match_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- CV & Cover Letter Buttons -->
+                            <div class="d-flex gap-2">
+                                {% if applicant.fallback_resume %}
+    <a href="{{ applicant.fallback_resume.url }}" class="btn btn-sm btn-outline-primary" download>
+        <i class="fas fa-file-pdf me-1"></i> Download CV
+    </a>
+    {% else %}
+        <span class="text-muted">No CV</span>
+    {% endif %}
+                                {% if applicant.cover_letter %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#coverLetterModal{{ applicant.id }}">
+                                    <i class="fas fa-envelope me-1"></i> Cover Letter
+                                </button>
                                 {% endif %}
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">
-                                    {% if applicant.applicant.seekerprofile %}
-                                        {{ applicant.applicant.seekerprofile.first_name }} {{ applicant.applicant.seekerprofile.last_name }}
-                                    {% else %}
-                                        {{ applicant.applicant.username }}
-                                    {% endif %}
-                                </h6>
-                                <small class="text-muted">{{ applicant.applicant.email }}</small>
-                            </div>
-                            <span class="status-badge 
-                                {% if applicant.status == 'accepted' %}bg-success
-                                {% elif applicant.status == 'rejected' %}bg-danger
-                                {% elif applicant.status == 'reviewed' %}bg-info
-                                {% else %}bg-warning text-dark{% endif %}">
-                                {{ applicant.status|title }}
-                            </span>
+
                         </div>
-                        <div class="mb-2"><small class="text-muted"><i class="fas fa-calendar me-1"></i>Applied: {{ applicant.applied_on|date:"M d, Y" }}</small></div>
-                        {% if applicant.applicant.seekerprofile.skills %}
-                        <div class="mb-2">
-                            <small class="text-muted d-block mb-1">Skills:</small>
-                            {% for skill in applicant.applicant.seekerprofile.skills.all %}
-                                <span class="badge bg-light text-dark">{{ skill.name }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% if applicant.match_score is not None %}
-                        <div class="mb-3">
-                            <small class="text-muted">Match Score: {{ applicant.match_score }}%</small>
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-match 
-                                    {% if applicant.match_score >= 75 %}bg-success
-                                    {% elif applicant.match_score >= 50 %}bg-warning
-                                    {% else %}bg-danger{% endif %}" 
-                                    role="progressbar" style="width: {{ applicant.match_score }}%" aria-valuenow="{{ applicant.match_score }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
         {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-users fa-4x text-muted mb-3"></i>
-            <h4 class="text-muted">No Applications Found</h4>
-        </div>
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Applications Found</h4>
+            </div>
         {% endif %}
     </div>
 
@@ -197,6 +200,8 @@
                         <th>Status</th>
                         <th>Applied On</th>
                         <th>Match Score</th>
+                        <th>CV</th>
+                        <th>Cover Letter</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -217,6 +222,16 @@
                         </td>
                         <td>{{ applicant.applied_on|date:"M d, Y" }}</td>
                         <td>{% if applicant.match_score is not None %}{{ applicant.match_score }}%{% else %}-{% endif %}</td>
+                        <td>
+                            {% if applicant.resume %}
+                                <a href="{{ applicant.resume.url }}" class="btn btn-sm btn-outline-primary" download>Download</a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if applicant.cover_letter %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#coverLetterModal{{ applicant.id }}">View</button>
+                            {% else %}-{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -229,7 +244,27 @@
         </div>
         {% endif %}
     </div>
+
 </div>
+
+<!-- ================= MODALS ================= -->
+{% for applicant in applications %}
+    {% if applicant.cover_letter %}
+        <div class="modal fade" id="coverLetterModal{{ applicant.id }}" tabindex="-1" aria-labelledby="coverLetterModalLabel{{ applicant.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="coverLetterModalLabel{{ applicant.id }}">Cover Letter - {{ applicant.applicant.username }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <pre style="white-space: pre-wrap;">{{ applicant.cover_letter }}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+{% endfor %}
 
 <script>
 // --- View Toggle ---
@@ -237,87 +272,53 @@ const cardViewBtn = document.getElementById('cardViewBtn');
 const tableViewBtn = document.getElementById('tableViewBtn');
 const cardView = document.getElementById('cardView');
 const tableView = document.getElementById('tableView');
-
-// Default: table view
 cardView.classList.add('d-none');
 tableViewBtn.classList.add('btn-primary');
 cardViewBtn.classList.add('btn-outline-primary');
 
-cardViewBtn.addEventListener('click', function() {
-    cardView.classList.remove('d-none');
-    tableView.classList.add('d-none');
-    cardViewBtn.classList.add('btn-primary');
-    cardViewBtn.classList.remove('btn-outline-primary');
-    tableViewBtn.classList.remove('btn-primary');
-    tableViewBtn.classList.add('btn-outline-primary');
+cardViewBtn.addEventListener('click', () => {
+    cardView.classList.remove('d-none'); tableView.classList.add('d-none');
+    cardViewBtn.classList.add('btn-primary'); cardViewBtn.classList.remove('btn-outline-primary');
+    tableViewBtn.classList.remove('btn-primary'); tableViewBtn.classList.add('btn-outline-primary');
+});
+tableViewBtn.addEventListener('click', () => {
+    cardView.classList.add('d-none'); tableView.classList.remove('d-none');
+    tableViewBtn.classList.add('btn-primary'); tableViewBtn.classList.remove('btn-outline-primary');
+    cardViewBtn.classList.remove('btn-primary'); cardViewBtn.classList.add('btn-outline-primary');
 });
 
-tableViewBtn.addEventListener('click', function() {
-    cardView.classList.add('d-none');
-    tableView.classList.remove('d-none');
-    tableViewBtn.classList.add('btn-primary');
-    tableViewBtn.classList.remove('btn-outline-primary');
-    cardViewBtn.classList.remove('btn-primary');
-    cardViewBtn.classList.add('btn-outline-primary');
-});
-
-// --- Filter Elements ---
+// --- Filter ---
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const filterBtn = document.getElementById('filterBtn');
 const clearBtn = document.getElementById('clearBtn');
-
-// --- Apply Filters Function ---
 function applyFilters() {
     const searchText = searchInput.value.toLowerCase();
     const statusValue = statusFilter.value.toLowerCase();
-
-    // Card View
     document.querySelectorAll('#cardView .applicant-card').forEach(card => {
         const name = card.dataset.name;
         const email = card.dataset.email;
         const status = card.dataset.status;
-        if ((name.includes(searchText) || email.includes(searchText)) && (statusValue === 'all' || status === statusValue)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = ((name.includes(searchText)||email.includes(searchText))&&(statusValue==='all'||status===statusValue))?'':'none';
     });
-
-    // Table View
     document.querySelectorAll('#tableView tbody tr').forEach(row => {
         const name = row.dataset.name;
         const email = row.dataset.email;
         const status = row.dataset.status;
-        if ((name.includes(searchText) || email.includes(searchText)) && (statusValue === 'all' || status === statusValue)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = ((name.includes(searchText)||email.includes(searchText))&&(statusValue==='all'||status===statusValue))?'':'none';
     });
 }
-
-// --- Event Listeners for Live Filtering ---
 filterBtn.addEventListener('click', applyFilters);
 searchInput.addEventListener('keyup', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
-
-// --- Clear Filters ---
-clearBtn.addEventListener('click', function() {
-    searchInput.value = '';
-    statusFilter.value = 'all';
-    applyFilters();
-});
+clearBtn.addEventListener('click', () => { searchInput.value=''; statusFilter.value='all'; applyFilters(); });
 
 // --- Export to Excel ---
 document.getElementById("exportExcel").addEventListener("click", function () {
     var table = document.querySelector("#tableView table");
     if (!table) { alert("Table view is empty!"); return; }
     var rows = Array.from(table.querySelectorAll("tr"));
-    var data = rows.map(row => {
-        let cells = Array.from(row.querySelectorAll("th, td")).map(cell => cell.innerText.trim());
-        return cells;
-    });
+    var data = rows.map(row => Array.from(row.querySelectorAll("th, td")).map(cell => cell.innerText.trim()));
     var worksheet = XLSX.utils.aoa_to_sheet(data);
     var workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Applicants");

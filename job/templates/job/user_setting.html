@@ -1,0 +1,63 @@
+{% extends 'seeker_base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 400px;">
+    <h2>Change Password</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert-message {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="current_password">Current Password</label>
+            <input type="password" name="current_password" id="current_password" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="new_password">New Password</label>
+            <input type="password" name="new_password" id="new_password" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirm_password">Confirm New Password</label>
+            <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Change Password</button>
+    </form>
+</div>
+
+<style>
+.alert-message {
+    position: relative;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    color: white;
+}
+
+.alert-success {
+    background-color: #28a745; /* green */
+}
+
+.alert-error {
+    background-color: #dc3545; /* red */
+}
+
+.close-btn {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+</style>
+{% endblock %}

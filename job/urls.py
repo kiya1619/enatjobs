@@ -33,6 +33,8 @@ urlpatterns = [
     path('delete_job_admin/<int:id>',views.delete_job_admin, name='delete_job_admin'),
     path('apply_job/<int:id>',views.apply_job, name='apply_job'),
     path('myjob/',views.myjob, name='myjob'),
+    path('user_setting/',views.user_setting, name='user_setting'),
+
     path('update_application_status/<int:id>',views.update_application_status, name='update_application_status'),
     path('aboutus/',views.aboutus, name='aboutus'),
     path('seeker_profile/',views.seeker_profile, name='seeker_profile'),

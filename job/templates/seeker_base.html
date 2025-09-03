@@ -384,16 +384,17 @@
 
                             <!-- Profile Dropdown -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {% if user.seekerprofile %}
-                                        <img src="{{ user.seekerprofile.avatar.url }}" alt="Profile" class="profile-img me-1" onerror="this.style.display='none'">
-                                        <span class="d-none d-lg-inline">{{ user.seekerprofile.first_name|title }} {{ user.seekerprofile.last_name|title }}</span>
-                                    {% elif user.employerprofile %}
-                                        <span class="d-none d-lg-inline">{{ user.employerprofile.comapany_name|title }}</span>
-                                    {% else %}
-                                        <span class="d-none d-lg-inline">{{ user.username|title }}</span>
-                                    {% endif %}
-                                </a>
+                              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    {% if user.seekerprofile %}
+        <img src="{{ user.seekerprofile.avatar.url }}" alt="Profile" class="profile-img me-1" onerror="this.style.display='none'">
+        <span class="me-1"><i class="fas fa-user me-1"></i> {{ user.seekerprofile.first_name|title }} {{ user.seekerprofile.last_name|title }}</span>
+    {% elif user.employerprofile %}
+        <span class="me-1"><i class="fas fa-building me-1"></i> {{ user.employerprofile.comapany_name|title }}</span>
+    {% else %}
+        <span class="me-1"><i class="fas fa-user me-1"></i> {{ user.username|title }}</span>
+    {% endif %}
+</a>
+
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                                     <li class="dropdown-header d-lg-none">
                                         {% if user.seekerprofile %}
@@ -410,13 +411,18 @@
                                     <li><a class="dropdown-item" href="{% url 'saved_jobs' %}"><i class="fas fa-sign-out-alt me-2"></i> saved jobs</a></li>
                                         <li><a class="dropdown-item" href="{% url 'compaines' %}"><i class="fas fa-user me-2"></i> Companies</a></li>
                                                                                 <li><a class="dropdown-item" href="{% url 'seeker_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'user_setting' %}"><i class="fas fa-cog me-2"></i> Settings</a></li>
 
 
                                     {% elif user.is_employer %}
                                         <li><a class="dropdown-item" href="{% url 'company_profile' %}"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'user_setting' %}"><i class="fas fa-cog me-2"></i> Settings</a></li>
                                     {% endif %}
+                                    
+                                    {% if user.is_superuser %}
                                     <li><a class="dropdown-item" href="{% url 'user_activity'  %}"><i class="fas fa-cog me-2"></i> User activity Log</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                                     {% else %}
+                                     {% endif %}   
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                                 </ul>
@@ -447,12 +453,10 @@
         </main>
         
 
-        <!-- Optional footer -->
-        <footer class="bg-light text-center py-3 mt-auto">
-            <div class="container">
-                <small>&copy; {{ now.year }} እናት Jobs</small>
-            </div>
-        </footer>
+       
+    </div>
+</footer>
+
 
         <!-- Scripts -->
         <script>

@@ -11,6 +11,8 @@ from .models import Job, JobApplication
 from django.utils import timezone
 from django.db import models
 import json
+from django.contrib.auth import update_session_auth_hash
+
 from functools import wraps
 from django.http import HttpResponseRedirect
 from .decorators import role_required
@@ -1133,3 +1135,29 @@ def login_activity_view(request):
     }
     return render(request, 'job/login_activity.html', context)
 
+
+@login_required
+def user_setting(request):
+    if request.method == 'POST':
+        current = request.POST.get('current_password')
+        new = request.POST.get('new_password')
+        confirm = request.POST.get('confirm_password')
+
+        user = request.user
+
+        # Check if current password is correct
+        if not user.check_password(current):
+            messages.error(request, 'Current password is incorrect.')
+        # Check if new password matches confirm password
+        elif new != confirm:
+            messages.error(request, 'New passwords do not match.')
+        else:
+            # Change password
+            user.set_password(new)
+            user.save()
+            # Keep user logged in after password change
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Password changed successfully!')
+            return redirect('user_setting')  # reload page
+
+    return render(request, 'job/user_setting.html')
