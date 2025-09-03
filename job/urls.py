@@ -39,6 +39,7 @@ urlpatterns = [
     path('admin_dashboard/',views.admin_dashboard, name='admin_dashboard'),
     path('view_application/<int:id>',views.view_application, name='view_application'),
     path('active_jobs/',views.active_jobs, name='active_jobs'),
+    path('view_all_applicants_employer/',views.view_all_applicants_employer, name='view_all_applicants_employer'),
     path('saved_jobs/',views.saved_jobs, name='saved_jobs'),
     path('expired_jobs/',views.expired_jobs, name='expired_jobs'),
     path('job_applied_show_admin/',views.job_applied_show_admin, name='job_applied_show_admin'),

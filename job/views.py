@@ -1075,3 +1075,23 @@ def delete_job_admin(request, id):
     job.delete()
     messages.success(request, "Job deleted successfully.")
     return redirect('manage_jobs')
+@role_required('employer')
+def view_all_applicants_employer(request):
+    try:
+        employer_profile = EmployerProfile.objects.get(user=request.user)
+    except EmployerProfile.DoesNotExist:
+        # Handle case where user is not an employer
+        messages.error(request, "You are not registered as an employer.")
+        return redirect('dashboard')  # or any page
+
+    # Get all jobs posted by this employer
+    jobs = Job.objects.filter(employer=employer_profile)
+    
+    # Get all applications for these jobs
+    applications = JobApplication.objects.filter(job__in=jobs).select_related('applicant', 'job')
+    
+    context = {
+        'applications': applications,
+        'jobs': jobs,
+    }
+    return render(request, 'job/view_all_applicants_employer.html', context)

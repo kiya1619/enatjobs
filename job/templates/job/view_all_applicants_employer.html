@@ -1,0 +1,189 @@
+{% extends 'seeker_base.html' %}
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <h2 class="mb-4 text-primary">All Applicants for Your Jobs</h2>
+
+    <!-- Filter Section -->
+    <div class="filter-section mb-4 p-3 bg-light rounded">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by name or email">
+            </div>
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="all">All Status</option>
+                    <option value="applied">Pending Review</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="jobFilter" class="form-select">
+                    <option value="all">All Jobs</option>
+                    {% for job in jobs %}
+                        <option value="{{ job.id }}">{{ job.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button id="clearFilters" class="btn btn-outline-secondary w-100"><i class="fas fa-refresh me-2"></i>Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Toggle -->
+    <div class="d-flex justify-content-end mb-3">
+        <button id="tableViewBtn" class="btn btn-primary btn-sm me-2"><i class="fas fa-table me-1"></i> Table View</button>
+        <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
+    </div>
+
+    <!-- Card View -->
+    <div id="cardView" class="row d-none">
+        {% for app in applications %}
+        <div class="col-lg-6 col-xl-4 mb-4 applicant-card"
+             data-name="{{ app.applicant.username|lower }}"
+             data-email="{{ app.applicant.email|lower }}"
+             data-status="{{ app.status|lower }}"
+             data-job="{{ app.job.id }}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6>{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }} {{ app.applicant.seekerprofile.last_name|default:'' }}</h6>
+                    <small class="text-muted">{{ app.applicant.email }}</small>
+                    <p class="mt-2 mb-1"><strong>Applied to:</strong> {{ app.job.title }}</p>
+                  <span class="badge bg-secondary">
+    {{ app.status|title }}
+</span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Applicants Found</h4>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Table View -->
+    <div id="tableView">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Applied To</th>
+                        <th>Applied On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr class="applicant-row"
+                        data-name="{{ app.applicant.username|lower }}"
+                        data-email="{{ app.applicant.email|lower }}"
+                        data-status="{{ app.status|lower }}"
+                        data-job="{{ app.job.id }}">
+                        <td>{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }} {{ app.applicant.seekerprofile.last_name|default:'' }}</td>
+                        <td>{{ app.applicant.email }}</td>
+                        <td>
+                           <span class="badge bg-secondary">
+    {{ app.status|title }}
+</span>
+                        </td>
+                        <td>{{ app.job.title }}</td>
+                        <td>{{ app.applied_on|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Toggle Views
+const cardViewBtn = document.getElementById('cardViewBtn');
+const tableViewBtn = document.getElementById('tableViewBtn');
+const cardView = document.getElementById('cardView');
+const tableView = document.getElementById('tableView');
+
+cardViewBtn.addEventListener('click', () => {
+    cardView.classList.remove('d-none');
+    tableView.classList.add('d-none');
+    cardViewBtn.classList.add('btn-primary');
+    cardViewBtn.classList.remove('btn-outline-primary');
+    tableViewBtn.classList.add('btn-outline-primary');
+    tableViewBtn.classList.remove('btn-primary');
+});
+
+tableViewBtn.addEventListener('click', () => {
+    cardView.classList.add('d-none');
+    tableView.classList.remove('d-none');
+    tableViewBtn.classList.add('btn-primary');
+    tableViewBtn.classList.remove('btn-outline-primary');
+    cardViewBtn.classList.add('btn-outline-primary');
+    cardViewBtn.classList.remove('btn-primary');
+});
+
+// Filters
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const jobFilter = document.getElementById('jobFilter');
+const clearFilters = document.getElementById('clearFilters');
+
+function applyFilters() {
+    const searchText = searchInput.value.toLowerCase();
+    const statusValue = statusFilter.value.toLowerCase();
+    const jobValue = jobFilter.value;
+
+    // Card view
+    document.querySelectorAll('#cardView .applicant-card').forEach(card => {
+        const name = card.dataset.name;
+        const email = card.dataset.email;
+        const status = card.dataset.status;
+        const job = card.dataset.job;
+        if ((name.includes(searchText) || email.includes(searchText)) &&
+            (statusValue === 'all' || status === statusValue) &&
+            (jobValue === 'all' || job === jobValue)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Table view
+    document.querySelectorAll('#tableView .applicant-row').forEach(row => {
+        const name = row.dataset.name;
+        const email = row.dataset.email;
+        const status = row.dataset.status;
+        const job = row.dataset.job;
+        if ((name.includes(searchText) || email.includes(searchText)) &&
+            (statusValue === 'all' || status === statusValue) &&
+            (jobValue === 'all' || job === jobValue)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Event listeners
+searchInput.addEventListener('keyup', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+jobFilter.addEventListener('change', applyFilters);
+clearFilters.addEventListener('click', () => {
+    searchInput.value = '';
+    statusFilter.value = 'all';
+    jobFilter.value = 'all';
+    applyFilters();
+});
+
+</script>
+
+{% endblock %}

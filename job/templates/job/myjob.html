@@ -22,7 +22,6 @@
 </select>
 
 
-    <button type="submit" class="btn btn-primary">Filter</button>
 </form>
 
 
@@ -155,5 +154,31 @@
     </div>
     {% endif %}
 </div>
+<script>
+// --- Job Filter ---
+const jobSelect = document.querySelector('select[name="job_id"]');
+
+function filterJobs() {
+    const selectedJob = jobSelect.value;
+
+    document.querySelectorAll('.row > .col-lg-6').forEach(cardCol => {
+        const jobTitle = cardCol.querySelector('.card-title').innerText;
+        const jobId = cardCol.querySelector('.dropdown button').id.replace('jobDropdown','');
+
+        if (!selectedJob || selectedJob === jobId) {
+            cardCol.style.display = '';
+        } else {
+            cardCol.style.display = 'none';
+        }
+    });
+}
+
+// Live filter when selection changes
+jobSelect.addEventListener('change', filterJobs);
+
+// Apply filter on page load in case a job was preselected
+document.addEventListener('DOMContentLoaded', filterJobs);
+</script>
+
 
 {% endblock %}

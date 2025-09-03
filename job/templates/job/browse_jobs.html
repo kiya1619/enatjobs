@@ -732,6 +732,39 @@
             });
         });
     });
+    document.querySelector('.job-search-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // stop full page reload
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    for (const [key, value] of formData.entries()) {
+        if (value) { // only include non-empty filters
+            params.append(key, value);
+        }
+    }
+
+    fetch(form.action + '?' + params.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Replace job listings container with new filtered jobs
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newJobs = doc.querySelector('.job-listing-container .row');
+        document.querySelector('.job-listing-container .row').replaceWith(newJobs);
+    })
+    .catch(err => console.error(err));
+});
+document.querySelectorAll('.job-search-form input, .job-search-form select').forEach(el => {
+    el.addEventListener('change', function() {
+        this.form.dispatchEvent(new Event('submit')); // trigger AJAX submit
+    });
+});
 </script>
 
 {% endblock content %}
