@@ -2,32 +2,115 @@
 
 {% block content %}
 <style>
-    /* ... your existing styles ... */
-    .delete-button {
-        background-color: #e53e3e;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 12px;
-    }
-    .delete-button:hover {
-        background-color: #c53030;
-    }
+/* Container */
+.user-management-container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.table-header {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #0d6efd;
+}
+
+/* Search box */
+#userSearch {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 0.95rem;
+}
+
+/* Table */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.user-table th, .user-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+.user-table thead {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.user-table tbody tr:nth-child(even) {
+    background-color: #f1f3f5;
+}
+
+.user-table tbody tr:hover {
+    background-color: #e7f1ff;
+}
+
+/* Role badges */
+.role-badge {
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #fff;
+    display: inline-block;
+}
+
+.job-seeker { background-color: #0dcaf0; }
+.job-employer { background-color: #198754; }
+.admin { background-color: #6c757d; }
+
+/* Delete button */
+.delete-button {
+    background-color: #e53e3e;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.delete-button:hover {
+    background-color: #c53030;
+}
+/* Make role text bold and standout without background */
+.text-standout {
+    font-weight: 700;          /* bold text */
+    font-size: 0.95rem;        /* slightly bigger than normal */
+    color: #0d6efd;            /* primary accent color */
+    letter-spacing: 0.5px;     /* slightly spaced letters */
+    text-transform: uppercase; /* optional for extra emphasis */
+}
+
 </style>
 
 <div class="user-management-container">
     <h2 class="table-header">User Management</h2>
-      {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-    <table class="user-table">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Search -->
+    <input type="text" id="userSearch" placeholder="Search users by username, email, or role...">
+
+    <!-- Table -->
+    <table class="user-table" id="usersTable">
         <thead>
             <tr>
                 <th>Username</th>
@@ -41,9 +124,10 @@
             <tr>
                 <td>{{ user.username }}</td>
                 <td>
-                    <span class="role-badge {% if user.is_job_seeker %}job-seeker {% elif user.is_job_employer %}job-employer {% else %}admin{% endif %}">
-                        {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
-                    </span>
+                  <span class="role-badge text-standout">
+    {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
+</span>
+
                 </td>
                 <td>{{ user.email }}</td>
                 <td>
@@ -59,4 +143,29 @@
         </tbody>
     </table>
 </div>
+
+<!-- JS for search -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('userSearch');
+    const table = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase();
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const username = rows[i].cells[0].textContent.toLowerCase();
+            const role = rows[i].cells[1].textContent.toLowerCase();
+            const email = rows[i].cells[2].textContent.toLowerCase();
+
+            if (username.includes(filter) || role.includes(filter) || email.includes(filter)) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
