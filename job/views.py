@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.db import models
 import json
 from django.contrib.auth import update_session_auth_hash
+from datetime import timedelta
 
 from functools import wraps
 from django.http import HttpResponseRedirect
@@ -271,7 +272,7 @@ def browse_jobs(request):
         type_map = {
             "full_time": "full-time",
             "part_time": "part-time",
-            "internship": "internship",
+            "internship": "Internship",
             "contract": "contract",
         }
         mapped_type = type_map.get(job_type_query)
@@ -424,7 +425,7 @@ def company_profile(request):
 
     if request.method == 'POST':
     # Update EmployerProfile fields
-        employer_profile.comapany_name = request.POST.get('comapany_name', employer_profile.comapany_name)
+        employer_profile.comapany_name = request.POST.get('company_name', employer_profile.comapany_name)
         employer_profile.website = request.POST.get('website', employer_profile.website)
         employer_profile.About_company = request.POST.get('description', employer_profile.About_company)
         employer_profile.contact_phone = request.POST.get('phone', employer_profile.contact_phone)
@@ -566,19 +567,19 @@ def apply_job(request, id):
     target=f'/view_applicants/{job.id}'  # Link to view applications
 )
         # Send email notification to employer
-        if job.employer.contact_email:
-            try:
-                send_mail(
-                    subject="New Job Application Received",
-                    message=f"{request.user.username} has test for your job: {job.title}.",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[job.employer.contact_email],
-                    fail_silently=False
-                )
-                print(f"Email sent to {job.employer.contact_email}")
-            except Exception as e:
-                # Print error to console for debugging
-                print("Email sending failed:", e)
+        # if job.employer.contact_email:
+        #     try:
+        #         send_mail(
+        #             subject="New Job Application Received",
+        #             message=f"{request.user.username} has test for your job: {job.title}.",
+        #             from_email=settings.DEFAULT_FROM_EMAIL,
+        #             recipient_list=[job.employer.contact_email],
+        #             fail_silently=False
+        #         )
+        #         print(f"Email sent to {job.employer.contact_email}")
+        #     except Exception as e:
+        #         # Print error to console for debugging
+        #         print("Email sending failed:", e)
 
         messages.success(request, "Your application has been submitted successfully!")
         return redirect('myapplications')
@@ -695,33 +696,33 @@ def update_application_status(request, id):
 
 
             # 3. Determine recipient email (SeekerProfile email if exists)
-            recipient_email = getattr(application.applicant, 'seekerprofile', None)
-            if recipient_email and application.applicant.seekerprofile.email:
-                recipient_email = application.applicant.seekerprofile.email
-            else:
-                recipient_email = application.applicant.email  # fallback
+            # recipient_email = getattr(application.applicant, 'seekerprofile', None)
+            # if recipient_email and application.applicant.seekerprofile.email:
+            #     recipient_email = application.applicant.seekerprofile.email
+            # else:
+            #     recipient_email = application.applicant.email  # fallback
 
             # 4. Send email if email exists
-            if recipient_email:
-                if status == 'accepted':
-                    subject = "Congratulations! Your Job Application is Accepted"
-                    message = f"Dear {application.applicant.username},\n\n" \
-                              f"Your application for '{application.job.title}' has been accepted. The employer will contact you with the next steps."
-                elif status == 'rejected':
-                    subject = "Job Application Update"
-                    message = f"Dear {application.applicant.username},\n\n" \
-                              f"We regret to inform you that your application for '{application.job.title}' was not successful."
+            # if recipient_email:
+            #     if status == 'accepted':
+            #         subject = "Congratulations! Your Job Application is Accepted"
+            #         message = f"Dear {application.applicant.username},\n\n" \
+            #                   f"Your application for '{application.job.title}' has been accepted. The employer will contact you with the next steps."
+            #     elif status == 'rejected':
+            #         subject = "Job Application Update"
+            #         message = f"Dear {application.applicant.username},\n\n" \
+            #                   f"We regret to inform you that your application for '{application.job.title}' was not successful."
 
-                try:
-                    send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[recipient_email],
-                        fail_silently=False
-                    )
-                except Exception as e:
-                    print(f"Failed to send email: {e}")
+            #     try:
+            #         send_mail(
+            #             subject=subject,
+            #             message=message,
+            #             from_email=settings.DEFAULT_FROM_EMAIL,
+            #             recipient_list=[recipient_email],
+            #             fail_silently=False
+            #         )
+            #     except Exception as e:
+            #         print(f"Failed to send email: {e}")
 
             messages.success(request, f"Application status updated to '{status}' and seeker notified.")
 
@@ -808,9 +809,13 @@ def admin_dashboard(request):
 
     # Accepted applications (Jobs filled)
     accepted_applications = JobApplication.objects.filter(status='accepted').count()
-
+    filled_jobs = Job.objects.annotate(
+    accepted_count=Count('jobapplication', filter=Q(jobapplication__status='accepted'))
+            ).filter(accepted_count__gt=0).count()
     # Calculate filled rate safely (avoid division by zero)
-    filled_rate = (accepted_applications / total_jobs * 100) if total_jobs else 0
+    total_jobs = Job.objects.count()
+
+    filled_rate = (filled_jobs / total_jobs * 100) if total_jobs else 0
 
     # Recent activities (applications, job posts, new users)
     recent_applications = JobApplication.objects.select_related('applicant', 'job').order_by('-applied_on')[:5]
@@ -881,8 +886,28 @@ def admin_dashboard(request):
     jobs_change = ((jobs_current_month - jobs_previous_month) / jobs_previous_month * 100) if jobs_previous_month else 0
     applications_change = ((apps_current_month - apps_previous_month) / apps_previous_month * 100) if apps_previous_month else 0
 
+    #new jobs posted today
+    today = timezone.now().date()
+    new_jobs_today = Job.objects.filter(posted_on__date=today).count()
+    #new users today
+    new_users_today = User.objects.filter(date_joined__date=today).count()
+    #inactive users
+    inactive_threshold = today - timedelta(days=30)  # 30 days of inactivity
+    inactive_users = User.objects.filter(last_login__lt=inactive_threshold).count()
+
+
+    # Top 5 users with the most applications
+    top_employers = (
+    EmployerProfile.objects
+    .annotate(job_count=Count('job'))  # 'job' is the reverse relation from Job model
+    .order_by('-job_count')[:5]
+)
     context = {
+        'top_employers': top_employers,
         'total_users': total_users,
+        'new_users_today': new_users_today,
+        'inactive_users': inactive_users,
+        'new_jobs_today': new_jobs_today,   
         'total_job_seekers': total_job_seekers,
         'total_employers': total_employers,
         'total_jobs': total_jobs,
@@ -921,7 +946,7 @@ def all_jobs(request):
         'active_jobs': active_jobs,
         'expired': expired,
     }
-    return render(request, 'job/active_jobs.html', context)
+    return render(request, 'job/all_jobs_admin.html', context)
 
 @role_required('job_seeker')
 def saved_jobs(request):

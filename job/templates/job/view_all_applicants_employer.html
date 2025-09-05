@@ -43,7 +43,6 @@
             <button id="tableViewBtn" class="btn btn-primary btn-sm me-2"><i class="fas fa-table me-1"></i> Table View</button>
             <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
         </div>
-        <!-- Export Buttons -->
         <div class="btn-group">
             <button id="exportCsv" class="btn btn-outline-success btn-sm"><i class="fas fa-file-csv me-1"></i> CSV</button>
             <button id="exportExcel" class="btn btn-outline-primary btn-sm"><i class="fas fa-file-excel me-1"></i> Excel</button>
@@ -65,13 +64,19 @@
                     <small class="text-muted">{{ app.applicant.email }}</small>
                     <p class="mt-2 mb-1"><strong>Applied to:</strong> {{ app.job.title }}</p>
                     <span class="badge bg-secondary">{{ app.status|title }}</span>
+                    <div class="mt-2">
+                        {% if app.cover_letter %}
+                        <button type="button" class="btn btn-sm btn-outline-secondary view-cover-letter-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#coverLetterModal"
+                                data-coverletter="{{ app.cover_letter|escapejs }}"
+                                data-applicant="{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }}">
+                            View Cover Letter
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        {% empty %}
-        <div class="text-center py-5">
-            <i class="fas fa-users fa-4x text-muted mb-3"></i>
-            <h4 class="text-muted">No Applicants Found</h4>
         </div>
         {% endfor %}
     </div>
@@ -87,6 +92,7 @@
                         <th>Status</th>
                         <th>Applied To</th>
                         <th>Applied On</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,6 +107,17 @@
                         <td><span class="badge bg-secondary">{{ app.status|title }}</span></td>
                         <td>{{ app.job.title }}</td>
                         <td>{{ app.applied_on|date:"M d, Y" }}</td>
+                        <td>
+                            {% if app.cover_letter %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary view-cover-letter-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#coverLetterModal"
+                                    data-coverletter="{{ app.cover_letter|escapejs }}"
+                                    data-applicant="{{ app.applicant.seekerprofile.first_name|default:app.applicant.username }}">
+                                View
+                            </button>
+                            {% else %}-{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -108,6 +125,24 @@
         </div>
     </div>
 
+</div>
+
+<!-- Single Reusable Modal -->
+<div class="modal fade" id="coverLetterModal" tabindex="-1" aria-labelledby="coverLetterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="coverLetterModalLabel">Cover Letter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="coverLetterContent" style="white-space: pre-wrap;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- JS Libraries for Export -->
@@ -202,6 +237,29 @@ document.getElementById('exportPdf').addEventListener('click', () => {
     const doc = new jsPDF();
     doc.autoTable({ html: '#applicantsTable' });
     doc.save('Applicants.pdf');
+});
+
+// Single reusable modal logic
+const coverLetterModal = document.getElementById('coverLetterModal');
+const coverLetterContent = document.getElementById('coverLetterContent');
+const modalTitle = coverLetterModal.querySelector('.modal-title');
+
+document.querySelectorAll('.view-cover-letter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const content = btn.getAttribute('data-coverletter');
+        const applicant = btn.getAttribute('data-applicant');
+        coverLetterContent.textContent = content;
+        modalTitle.textContent = 'Cover Letter - ' + applicant;
+    });
+});
+document.querySelectorAll('.view-cover-letter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        let content = btn.getAttribute('data-coverletter');
+        content = content.replace(/\\u000D\\u000A/g, '\n');  // replace escaped CRLF with real newline
+        const applicant = btn.getAttribute('data-applicant');
+        coverLetterContent.textContent = content;
+        modalTitle.textContent = 'Cover Letter - ' + applicant;
+    });
 });
 </script>
 

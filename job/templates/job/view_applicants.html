@@ -202,6 +202,7 @@
                         <th>Match Score</th>
                         <th>CV</th>
                         <th>Cover Letter</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -231,6 +232,20 @@
                             {% if applicant.cover_letter %}
                                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#coverLetterModal{{ applicant.id }}">View</button>
                             {% else %}-{% endif %}
+                        </td>
+                        <td>
+                   
+    {% if applicant.status != 'accepted' %}
+        <form method="post" action="{% url 'update_application_status' applicant.id %}" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" name="status" value="accepted" class="btn btn-success btn-sm">Accept</button>
+            <button type="submit" name="status" value="rejected" class="btn btn-danger btn-sm">Reject</button>
+        </form>
+    {% else %}
+        <a href="{% url 'view_application' applicant.id %}" class="btn btn-warning btn-sm">Edit</a>
+    {% endif %}
+
+
                         </td>
                     </tr>
                     {% endfor %}

@@ -443,7 +443,7 @@
     <!-- Basic Filters -->
     <div class="form-group">
         <label for="search">Job Title or Keyword</label>
-        <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control search-input">
+        <input type="text" id="search" name="search" placeholder = "job title, company name" value="{{ search_query }}" class="form-control search-input">
     </div>
 
    <div class="form-group">
@@ -574,7 +574,7 @@
                     {% else %}
                     <i class="fas fa-building"></i>
                     {% endif %}
-                    <span>{{ job.employer.user.username|title }}</span>
+                    <span>{{ job.employer.comapany_name|title }}</span>
                 </div>
 
                 <div class="job-meta">
@@ -684,28 +684,74 @@
 </div>
 
 <script>
-    // Toggle advanced filters
-    document.getElementById('advancedToggle').addEventListener('click', function() {
-        const filters = document.getElementById('advancedFilters');
-        const icon = this.querySelector('.fa-chevron-down');
-        
-        filters.classList.toggle('show');
-        icon.classList.toggle('fa-chevron-down');
-        icon.classList.toggle('fa-chevron-up');
+    // Debounce helper
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    // AJAX form submit
+    function submitJobSearchForm() {
+        const form = document.querySelector('.job-search-form');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+
+        for (const [key, value] of formData.entries()) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+
+        fetch(form.action + '?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newJobs = doc.querySelector('.job-listing-container .row');
+            document.querySelector('.job-listing-container .row').replaceWith(newJobs);
+        })
+        .catch(err => console.error(err));
+    }
+
+    // Trigger AJAX on select change
+    document.querySelectorAll('.job-search-form select').forEach(el => {
+        el.addEventListener('change', submitJobSearchForm);
     });
-    
-    // Sort functionality
-  
-    // Save job animation
+
+    // Trigger AJAX on typing for Job Title/Keyword input
+    const searchInput = document.querySelector('#search');
+    searchInput.addEventListener('input', debounce(submitJobSearchForm, 500));
+
+    // Advanced Filters toggle
+    const advancedToggle = document.getElementById('advancedToggle');
+    advancedToggle.addEventListener('click', function() {
+        const filters = document.getElementById('advancedFilters');
+        const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+
+        filters.classList.toggle('show');
+
+        // Toggle icon
+        if (icon.classList.contains('fa-chevron-down')) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    });
+
+    // Save/unsave job button
     document.querySelectorAll('.btn-bookmark').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const url = this.href;
-            
-            // Visual feedback
             this.classList.add('saving');
-            
-            // AJAX request to save/unsave job
+
             fetch(url, {
                 method: 'POST',
                 headers: {
@@ -722,49 +768,16 @@
                     this.classList.remove('saved');
                     this.innerHTML = '<i class="far fa-bookmark"></i>';
                 }
-                
                 this.classList.remove('saving');
             })
             .catch(error => {
                 console.error('Error:', error);
                 this.classList.remove('saving');
-                window.location.href = url; // Fallback to direct link if AJAX fails
+                window.location.href = url; // fallback
             });
         });
     });
-    document.querySelector('.job-search-form').addEventListener('submit', function(e) {
-    e.preventDefault(); // stop full page reload
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-
-    for (const [key, value] of formData.entries()) {
-        if (value) { // only include non-empty filters
-            params.append(key, value);
-        }
-    }
-
-    fetch(form.action + '?' + params.toString(), {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.text())
-    .then(html => {
-        // Replace job listings container with new filtered jobs
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newJobs = doc.querySelector('.job-listing-container .row');
-        document.querySelector('.job-listing-container .row').replaceWith(newJobs);
-    })
-    .catch(err => console.error(err));
-});
-document.querySelectorAll('.job-search-form input, .job-search-form select').forEach(el => {
-    el.addEventListener('change', function() {
-        this.form.dispatchEvent(new Event('submit')); // trigger AJAX submit
-    });
-});
 </script>
+
 
 {% endblock content %}

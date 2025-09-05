@@ -1,190 +1,91 @@
 {% extends 'seeker_base.html' %}
+{% load static %}
 
 {% block content %}
-<style>
-/* Container */
-.user-management-container {
-    padding: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.05);
-}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 text-primary"><i class="fas fa-users me-2"></i>User Management</h2>
+        <span class="badge bg-info">{{ users|length }} Total</span>
+    </div>
 
-/* Header */
-.table-header {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #0d6efd;
-}
-
-/* Search box */
-#userSearch {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    font-size: 0.95rem;
-}
-
-/* Table */
-.user-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.user-table th, .user-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-}
-
-.user-table thead {
-    background-color: #0d6efd;
-    color: #fff;
-}
-
-.user-table tbody tr:nth-child(even) {
-    background-color: #f1f3f5;
-}
-
-.user-table tbody tr:hover {
-    background-color: #e7f1ff;
-}
-
-/* Role badges */
-.role-badge {
-    padding: 0.3rem 0.7rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #fff;
-    display: inline-block;
-}
-
-.job-seeker { background-color: #0dcaf0; }
-.job-employer { background-color: #198754; }
-.admin { background-color: #6c757d; }
-
-/* Delete button */
-.delete-button {
-    background-color: #e53e3e;
-    color: #fff;
-    border: none;
-    padding: 5px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-}
-.delete-button:hover {
-    background-color: #c53030;
-}
-/* Make role text bold and standout without background */
-.text-standout {
-    font-weight: 700;          /* bold text */
-    font-size: 0.95rem;        /* slightly bigger than normal */
-    color: #0d6efd;            /* primary accent color */
-    letter-spacing: 0.5px;     /* slightly spaced letters */
-    text-transform: uppercase; /* optional for extra emphasis */
-}
-/* Force table responsiveness */
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Smaller font + padding on mobile */
-@media (max-width: 576px) {
-    .user-table th, .user-table td {
-        font-size: 0.8rem;
-        padding: 0.5rem;
-        white-space: nowrap; /* prevent breaking words awkwardly */
-    }
-    #userSearch {
-        font-size: 0.85rem;
-    }
-}
-
-</style>
-
-<div class="user-management-container">
-    <h2 class="table-header">User Management</h2>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <!-- Search -->
-    <input type="text" id="userSearch" placeholder="Search users by username, email, or role...">
-
-   <!-- Table -->
-<div class="table-responsive">
-    <table class="table user-table" id="usersTable">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>
-                    <span class="text-standout">
-                        {% if user.is_job_seeker %}Job Seeker{% elif user.is_employer %}Employer{% else %}Admin{% endif %}
-                    </span>
-                </td>
-                <td>{{ user.email }}</td>
-                <td>
-                    {% if not user.is_superuser %}
-                    <form method="POST" action="{% url 'delete_user' user.id %}" 
-                          onsubmit="return confirm('Are you sure you want to delete this user?');">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-button">Delete</button>
-                    </form>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div class="table-responsive">
+        <table id="usersTable" class="table table-striped table-hover nowrap" style="width:100%">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr {% if not user.is_active %}class="table-danger"{% endif %}>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        {% if user.is_job_seeker %}
+                            <span class="badge bg-info">Job Seeker</span>
+                        {% elif user.is_employer %}
+                            <span class="badge bg-success">Employer</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Admin</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td class="text-center">
+                        {% if not user.is_superuser %}
+                        <form method="POST" action="{% url 'delete_user' user.id %}" 
+                              onsubmit="return confirm('Are you sure you want to delete this user?');"
+                              class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- JS for search -->
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('userSearch');
-    const table = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
-
-    searchInput.addEventListener('keyup', function() {
-        const filter = searchInput.value.toLowerCase();
-        const rows = table.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            const username = rows[i].cells[0].textContent.toLowerCase();
-            const role = rows[i].cells[1].textContent.toLowerCase();
-            const email = rows[i].cells[2].textContent.toLowerCase();
-
-            if (username.includes(filter) || role.includes(filter) || email.includes(filter)) {
-                rows[i].style.display = '';
-            } else {
-                rows[i].style.display = 'none';
-            }
+$(document).ready(function() {
+    $('#usersTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        order: [[0, "asc"]],
+        columnDefs: [
+            { responsivePriority: 1, targets: 1 }, // Username always visible
+            { responsivePriority: 2, targets: -1 } // Actions always visible
+        ],
+        language: {
+            search: "Filter:",
+            lengthMenu: "Show _MENU_ users",
+            info: "Showing _START_ to _END_ of _TOTAL_ users",
+            infoEmpty: "No users available",
+            paginate: { "previous": "Prev", "next": "Next" }
         }
     });
 });
 </script>
+
+<style>
+.table-danger {
+    opacity: 0.9; /* like expired jobs styling */
+}
+</style>
 {% endblock %}

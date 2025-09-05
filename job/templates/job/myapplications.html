@@ -1,9 +1,9 @@
 {% extends 'seeker_base.html' %}
-
+{% load static %}
 {% block content %}
-<div class="container py-4">
 
-    <h4 class="mb-3 text-primary">My Applications</h4>
+<div class="container py-5">
+    <h4 class="mb-4 text-primary">My Applications</h4>
 
     {% if messages %}
         {% for message in messages %}
@@ -15,34 +15,38 @@
     {% endif %}
 
     {% if applications %}
-    <div class="mb-3 d-flex justify-content-end">
-        <input type="text" id="searchInput" class="form-control w-auto" placeholder="Search by job or employer">
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
+    <div class="table-responsive shadow-sm rounded">
+        <table id="applicationsTable" class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
                 <tr>
+                    <th>#</th>
                     <th>Job</th>
                     <th>Employer</th>
-                    <th>Applied</th>
+                    <th>Applied On</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="applicationsTable">
+            <tbody>
                 {% for app in applications %}
-                <tr class="applicant-row" data-job="{{ app.job.title|lower }}" data-employer="{{ app.job.employer.comapany_name|lower }}">
+                <tr class="hover-row">
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ app.job.title|truncatechars:50 }}</td>
                     <td>{{ app.job.employer.comapany_name|title|truncatechars:20 }}</td>
                     <td>{{ app.applied_on|date:"M d, Y" }}</td>
-                    <td><span class="badge bg-secondary">{{ app.status|title }}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ app.id }}">Details</button>
+                        <span class="badge bg-{{ app.status|lower|yesno:'success,danger' }}">
+                            {{ app.status|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#detailsModal{{ app.id }}">
+                            Details
+                        </button>
                         {% if app.status == 'applied' %}
                         <form method="post" action="{% url 'withdraw_application' app.id %}" class="d-inline-block" onsubmit="return confirm('Are you sure you want to withdraw this application?');">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-warning btn-sm">Withdraw</button>
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Withdraw</button>
                         </form>
                         {% endif %}
                     </td>
@@ -51,14 +55,14 @@
                 <!-- Modal -->
                 <div class="modal fade" id="detailsModal{{ app.id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
+                        <div class="modal-content shadow-sm rounded">
+                            <div class="modal-header bg-dark text-white">
                                 <h5 class="modal-title">{{ app.job.title }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <p><strong>Employer:</strong> {{ app.job.employer.comapany_name }}</p>
-                                <p><strong>Applied on:</strong> {{ app.applied_on|date:"M d, Y" }}</p>
+                                <p><strong>Applied On:</strong> {{ app.applied_on|date:"M d, Y" }}</p>
                                 <p><strong>Status:</strong> {{ app.status|title }}</p>
                                 <hr>
                                 <p><strong>Cover Letter:</strong></p>
@@ -70,7 +74,6 @@
                         </div>
                     </div>
                 </div>
-
                 {% endfor %}
             </tbody>
         </table>
@@ -83,22 +86,60 @@
     {% endif %}
 </div>
 
-<script>
-    // Live search in table
-    const searchInput = document.getElementById('searchInput');
-    const rows = document.querySelectorAll('.applicant-row');
+<!-- DataTables & Bootstrap 5 integration -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.toLowerCase();
-        rows.forEach(row => {
-            const job = row.dataset.job;
-            const employer = row.dataset.employer;
-            if (job.includes(query) || employer.includes(query)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+<script>
+    $(document).ready(function() {
+        $('#applicationsTable').DataTable({
+            "pageLength": 25,
+            "lengthMenu": [[10, 25, 30], [10, 25, 30]],
+            "ordering": true,
+            "searching": true,
+            "columnDefs": [
+                { "orderable": false, "targets": 5 } // Action column not sortable
+            ],
+            "language": {
+                "search": "Filter applications:",
+                "lengthMenu": "Show _MENU_ rows",
+                "info": "Showing _START_ to _END_ of _TOTAL_ applications",
+                "infoEmpty": "No applications found",
+                "paginate": {
+                    "previous": "Prev",
+                    "next": "Next"
+                }
             }
         });
+
+        // Hover effect for rows
+        $('.hover-row').hover(
+            function() { $(this).css('background-color', '#f1f5f9'); },
+            function() { $(this).css('background-color', ''); }
+        );
     });
 </script>
+
+<style>
+    /* Table styling matching your Jobs table */
+    #applicationsTable th, #applicationsTable td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    #applicationsTable tbody tr td:first-child {
+        text-align: left;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+    .badge-success {
+        background-color: #198754;
+    }
+    .badge-danger {
+        background-color: #dc3545;
+    }
+</style>
+
 {% endblock %}
