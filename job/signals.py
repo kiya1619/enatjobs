@@ -5,7 +5,10 @@ from .models import JobApplication, Notification2  # use Notification2 instead
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from .models import LoginActivity
-print("Jobs signals module loaded!")  # Optional: confirms signals.py is loaded
+from django.contrib.auth.signals import user_login_failed
+from .models import FailedLoginAttempt
+from django.utils import timezone
+
 
 
 @receiver(post_save, sender=JobApplication)
@@ -36,3 +39,14 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+@receiver(user_login_failed)
+def log_failed_login(sender, credentials, request, **kwargs):
+    username = credentials.get('username', 'Unknown')
+    ip = get_client_ip(request)
+
+    FailedLoginAttempt.objects.create(
+        username=username,
+        ip_address=ip,
+        timestamp=timezone.now()
+    )

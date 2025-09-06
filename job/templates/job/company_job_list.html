@@ -7,7 +7,7 @@
     width: 120px;            /* bigger size */
     height: 120px;
     border-radius: 50%;      /* makes it round */
-    object-fit: cover;       /* ensures image covers the container */
+    object-fit: contain;       /* ensures image covers the container */
     box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* fancy shadow */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* smooth hover */
 }
@@ -31,6 +31,7 @@
     font-size: 0.9rem;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
 }
 
 .no-logo:hover {

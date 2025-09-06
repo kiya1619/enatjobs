@@ -294,11 +294,10 @@
                         <li class="nav-item">
                             {% if user.is_authenticated %}
                               
-                                {% if  user.is_job_seeker %}
-                                    <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
-                                                                    <li class="nav-item d-none d-lg-block"><a class="nav-link" href="{% url 'browse_jobs' %}"><i class="fas fa-list me-1"></i> Browse Jobs</a></li>
+                               
+                                   
 
-                                {% elif user.is_employer %}
+                                {% if user.is_employer %}
                                     <a class="nav-link" href="{% url 'employer_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                                 {% endif %}
                             {% else %}
@@ -308,10 +307,16 @@
                         
                         {% if user.is_authenticated and user.is_job_seeker %}
                         <li class="nav-item">
-<a class="nav-link" href="{% url 'recommended_jobs' %}">
-    <i class="fas fa-star me-1"></i> Recommended Jobs
-</a>
+                                <a class="nav-link" href="{% url 'recommended_jobs' %}">
+                                    <i class="fas fa-star me-1"></i> Recommended Jobs
+                                </a>
                         </li>
+                         <li class="nav-item">
+                                <a class="nav-link" href="{% url 'browse_jobs' %}">
+                                    <i class="fas fa-list me-1"></i>  Browse Jobs
+                                </a>
+                        </li>
+                         <a class="nav-link" href="{% url 'job_seeker_dashboard' %}"><i class="fas fa-home me-1"></i> Home</a>
                         {% endif %}
                     
                         <li class="nav-item">

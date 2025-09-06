@@ -32,7 +32,13 @@ from job.skills import skills
 from django.db.models import Value, Func, F
 from django.db.models.functions import Replace, Lower
 from django.http import JsonResponse
-from .models import LoginActivity
+from .models import LoginActivity, FailedLoginAttempt
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from .models import FailedLoginAttempt,LoginAttempt
 
 User = get_user_model()
 
@@ -75,21 +81,69 @@ from django.shortcuts import render, redirect
 
 User = get_user_model()
 
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_TIME = 1
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from .models import FailedLoginAttempt
+
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_TIME = 1  # in minutes
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').lower()
         password = request.POST.get('password')
 
-        # Authenticate user (doesn't reveal if username exists)
+        # Count failed attempts in the last LOCKOUT_TIME minutes
+        recent_failed = FailedLoginAttempt.objects.filter(
+            username=username,
+            timestamp__gte=timezone.now() - timedelta(minutes=LOCKOUT_TIME)
+        ).count()
+
+        # Check lockout
+        if recent_failed >= MAX_FAILED_ATTEMPTS:
+            messages.error(request, f"Too many failed login attempts. Try again in {LOCKOUT_TIME} minute(s).")
+            return redirect('login')
+
+        # Authenticate
         user = authenticate(request, username=username, password=password)
 
         if user is None:
-            # Generic error message
-            messages.error(request, "Invalid username or password")
+            # Current attempt number = previous failed + 1
+            current_attempt = recent_failed + 1
+
+            # Log failed attempt
+            FailedLoginAttempt.objects.create(
+                username=username,
+                ip_address=get_client_ip(request),
+                timestamp=timezone.now()
+            )
+
+            remaining_attempts = MAX_FAILED_ATTEMPTS - current_attempt
+
+            if remaining_attempts > 0:
+                messages.error(request, f"Invalid username or password. You have {remaining_attempts} attempt(s) left.")
+            else:
+                messages.error(request, f"Invalid username or password. You have reached the maximum attempts. Try again in {LOCKOUT_TIME} minute(s).")
+
             return redirect('login')
 
-        # Login & redirect based on role
+        # Successful login: clear old failed attempts
+        FailedLoginAttempt.objects.filter(username=username).delete()
+
+        # Log in and redirect
         login(request, user)
         if getattr(user, 'is_employer', False):
             return redirect('employer_dashboard')
@@ -99,6 +153,68 @@ def user_login(request):
             return redirect('admin_dashboard')
 
     return render(request, 'job/login.html')
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from .models import FailedLoginAttempt
+
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_TIME = 1  # in minutes
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username', '').lower()
+        password = request.POST.get('password')
+
+        # Get or create LoginAttempt object for this user
+        attempt, created = LoginAttempt.objects.get_or_create(username=username)
+
+        # Check if locked
+        if attempt.is_locked():
+            messages.error(request, f"Too many failed attempts. Try again in {attempt.remaining_lockout_minutes()} minute(s).")
+            return redirect('login')
+
+        # Authenticate
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            # Increment failed attempts
+            attempt.failed_attempts += 1
+            if attempt.failed_attempts >= MAX_FAILED_ATTEMPTS:
+                attempt.lockout_until = timezone.now() + timedelta(minutes=LOCKOUT_TIME)
+                messages.error(request, f"Invalid username or password. You have reached the maximum attempts. Try again in {LOCKOUT_TIME} minute(s).")
+            else:
+                remaining_attempts = MAX_FAILED_ATTEMPTS - attempt.failed_attempts
+                messages.error(request, f"Invalid username or password. You have {remaining_attempts} attempt(s) left.")
+            attempt.save()
+            return redirect('login')
+
+        # Successful login: reset attempts
+        attempt.failed_attempts = 0
+        attempt.lockout_until = None
+        attempt.save()
+
+        # Log in user
+        login(request, user)
+        if getattr(user, 'is_employer', False):
+            return redirect('employer_dashboard')
+        elif getattr(user, 'is_job_seeker', False):
+            return redirect('job_seeker_dashboard')
+        elif user.is_superuser:
+            return redirect('admin_dashboard')
+
+    return render(request, 'job/login.html')
+
 @role_required('job_seeker')
 def job_seeker_dashboard(request):
     seeker = request.user.seekerprofile
@@ -1154,9 +1270,12 @@ def view_all_applicants_employer(request):
 def login_activity_view(request):
     # Show recent 50 logins
     login_activities = LoginActivity.objects.select_related('user').order_by('-timestamp')[:50]
-    
+    failed_logins = FailedLoginAttempt.objects.order_by('-timestamp')[:50]
+
     context = {
-        'login_activities': login_activities
+        'login_activities': login_activities,
+        'failed_logins': failed_logins,
+
     }
     return render(request, 'job/login_activity.html', context)
 

@@ -3,36 +3,82 @@
 
 {% block content %}
 <div class="container py-4">
-    <h2 class="mb-4"><i class="fas fa-user-clock me-2"></i>Login Activity</h2>
-    <div class="mb-3 d-flex justify-content-end" id="exportButtons"></div>
+    <h2 class="mb-4"><i class="fas fa-user-clock me-2"></i>Login Monitoring</h2>
 
-    <div class="table-responsive">
-        <table id="loginActivityTable" class="table table-striped table-hover nowrap" style="width:100%">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>User</th>
-                    <th>IP Address</th>
-                    <th>User Agent</th>
-                    <th>Login Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for activity in login_activities %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ activity.user.username }}</td>
-                    <td>{{ activity.ip_address|default:"-" }}</td>
-                    <td>{{ activity.user_agent|truncatechars:50|default:"-" }}</td>
-                    <td>{{ activity.timestamp|date:"M d, Y H:i:s" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No login activity found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Tabs -->
+    <ul class="nav nav-pills mb-3" id="activityTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="success-tab" data-bs-toggle="pill" data-bs-target="#success" type="button" role="tab">Successful Logins</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="failed-tab" data-bs-toggle="pill" data-bs-target="#failed" type="button" role="tab">Failed Logins</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="activityTabsContent">
+        <!-- Successful Logins -->
+        <div class="tab-pane fade show active" id="success" role="tabpanel">
+            <div class="mb-3 d-flex justify-content-end" id="exportButtonsSuccess"></div>
+            <div class="table-responsive">
+                <table id="loginActivityTable" class="table table-striped table-hover nowrap" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>IP Address</th>
+                            <th>User Agent</th>
+                            <th>Login Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in login_activities %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ activity.user.username|default:"-" }}</td>
+                            <td>{{ activity.ip_address|default:"-" }}</td>
+                            <td>{{ activity.user_agent|truncatechars:50|default:"-" }}</td>
+                            <td>{{ activity.timestamp|date:"M d, Y H:i:s"|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No login activity found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Failed Logins -->
+        <div class="tab-pane fade" id="failed" role="tabpanel">
+            <div class="mb-3 d-flex justify-content-end" id="exportButtonsFailed"></div>
+            <div class="table-responsive">
+                <table id="failedLoginsTable" class="table table-striped table-hover nowrap" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in failed_logins %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ attempt.username|default:"-" }}</td>
+                            <td>{{ attempt.ip_address|default:"-" }}</td>
+                            <td>{{ attempt.timestamp|date:"M d, Y H:i:s"|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No failed login attempts found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -56,42 +102,47 @@
 
 <script>
 $(document).ready(function() {
-    var table = $('#loginActivityTable').DataTable({
+    // Successful Logins Table
+    var successTable = $('#loginActivityTable').DataTable({
         pageLength: 10,
-        order: [[4, "desc"]], // sort by Login Time
+        order: [[4, "desc"]],
         responsive: true,
+        autoWidth: false,
         dom: 'Bfrtip',
         buttons: [
-    { extend: 'csv', className: 'btn btn-sm btn-outline-primary', title: 'User Activity Log' },
-    { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'User Activity Log' },
-    { extend: 'pdf', className: 'btn btn-sm btn-outline-danger', title: 'User Activity Log' },
-    { extend: 'print', className: 'btn btn-sm btn-outline-dark', title: 'User Activity Log' }
-],
-        columnDefs: [
-            { responsivePriority: 1, targets: 1 }, // User column priority
-            { responsivePriority: 2, targets: 4 }  // Login Time priority
+            { extend: 'csv', className: 'btn btn-sm btn-outline-primary', title: 'Successful Logins' },
+            { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Successful Logins' },
+            { extend: 'pdf', className: 'btn btn-sm btn-outline-danger', title: 'Successful Logins' },
+            { extend: 'print', className: 'btn btn-sm btn-outline-dark', title: 'Successful Logins' }
         ],
-        language: {
-            search: "Filter:",
-            lengthMenu: "Show _MENU_ entries",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
-            infoEmpty: "No login activity found",
-            paginate: { "previous": "Prev", "next": "Next" }
-        }
     });
+    successTable.buttons().container().appendTo('#exportButtonsSuccess');
 
-    // Move export buttons into custom div
-    table.buttons().container().appendTo('#exportButtons');
+    // Failed Logins Table
+    var failedTable = $('#failedLoginsTable').DataTable({
+        pageLength: 10,
+        order: [[3, "desc"]],
+        responsive: true,
+        autoWidth: false,
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'csv', className: 'btn btn-sm btn-outline-primary', title: 'Failed Logins' },
+            { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Failed Logins' },
+            { extend: 'pdf', className: 'btn btn-sm btn-outline-danger', title: 'Failed Logins' },
+            { extend: 'print', className: 'btn btn-sm btn-outline-dark', title: 'Failed Logins' }
+        ],
+    });
+    failedTable.buttons().container().appendTo('#exportButtonsFailed');
 });
 </script>
 
 <style>
-    #loginActivityTable th, 
-    #loginActivityTable td {
+    #loginActivityTable th, #loginActivityTable td,
+    #failedLoginsTable th, #failedLoginsTable td {
         vertical-align: middle;
     }
-
-    #exportButtons .btn {
+    #exportButtonsSuccess .btn,
+    #exportButtonsFailed .btn {
         margin-left: 5px;
     }
 </style>

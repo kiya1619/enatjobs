@@ -180,3 +180,26 @@ class LoginActivity(models.Model):
 
     def __str__(self):
         return f"{self.user.username} logged in at {self.timestamp}"
+
+class FailedLoginAttempt(models.Model):
+    username = models.CharField(max_length=150)  # Store attempted username
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.username} - {self.ip_address} at {self.timestamp}"
+class LoginAttempt(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    failed_attempts = models.IntegerField(default=0)
+    lockout_until = models.DateTimeField(null=True, blank=True)
+
+    def is_locked(self):
+        if self.lockout_until and timezone.now() < self.lockout_until:
+            return True
+        return False
+
+    def remaining_lockout_minutes(self):
+        if self.lockout_until:
+            remaining = self.lockout_until - timezone.now()
+            return max(int(remaining.total_seconds() // 60), 0)
+        return 0
