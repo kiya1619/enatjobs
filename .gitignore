@@ -1,15 +1,30 @@
 # Python
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
+*.so
 
 # Django
 db.sqlite3
-/staticfiles/
+/media/
+staticfiles/
 *.log
 
-# VSCode
+# Environment files
+.env
+*.env
+
+# VSCode / IDE
 .vscode/
+.idea/
+*.swp
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Migrations (optional — if you don’t want to track them)
+# **Be careful: only ignore migrations if you know what you’re doing**
+# */migrations/*.py
+# !*/migrations/__init__.py

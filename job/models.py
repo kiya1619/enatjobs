@@ -70,6 +70,7 @@ class Job(models.Model):
     deadline = models.DateField()
     is_active = models.BooleanField(default=True)  # 👈 new field
 
+
     def is_still_active(self):
         return self.deadline >= timezone.now().date()
 

@@ -71,7 +71,7 @@ def register(request):
 def main(request):
     return render(request, 'job/main.html')
 
-
+@role_required('admin')
 def userlist(request):
     users = User.objects.all()
     return render(request, 'job/userlist.html', {'users': users})
@@ -1093,23 +1093,17 @@ def toggle_save_job(request, job_id):
     
     # Fallback for normal requests
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
 def company_job_list(request, id):
     company = get_object_or_404(EmployerProfile, id=id)
     jobs = Job.objects.filter(employer=company).order_by('-posted_on')
 
-    # Pagination (optional, 9 jobs per page)
-    paginator = Paginator(jobs, 9)
-    page_number = request.GET.get('page')
-    jobs_page = paginator.get_page(page_number)
     context = {
         'company': company,
-        'jobs': jobs_page,
         'total_jobs': jobs.count(),
+        'jobs': jobs,  # send all jobs, no pagination server-side
     }
 
     return render(request, 'job/company_job_list.html', context)
-
 
 def notification_redirect(request, id):
     notification = get_object_or_404(Notification, id=id, recipient=request.user)

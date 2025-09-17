@@ -609,8 +609,7 @@
                       {% if user.is_authenticated %}
     {% if job.id in applied_jobs_ids %}
         <button class="btn btn-secondary w-100" disabled>
-            <i class="fas fa-check me-1"></i>Already Applied
-        </button>
+            <i class="fas fa-check me-1"></i>Applied </button>
     {% else %}
         <a href="{% url 'view_jobdetail' job.id %}" class="btn btn-primary btn-job">Apply Now</a>
     {% endif %}

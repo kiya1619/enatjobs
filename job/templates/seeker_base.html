@@ -334,9 +334,17 @@
                                     <i class="fas fa-briefcase me-1"></i> Jobs
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="jobsDropdown">
-                                    <li><a class="dropdown-item" href="{% url 'all_jobs_admin' %}">All Jobs</a></li>
-                                   
-                                    <li><a class="dropdown-item" href="{% url 'job_applied_show_admin' %}">Job Applications</a></li>
+                                   <li>
+                                    <a class="dropdown-item" href="{% url 'all_jobs_admin' %}">
+                                        <i class="fas fa-briefcase me-2"></i> All Jobs
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'job_applied_show_admin' %}">
+                                        <i class="fas fa-file-alt me-2"></i> Job Applications
+                                    </a>
+                                </li>
+
                                 </ul>
                                 </li>
                           
