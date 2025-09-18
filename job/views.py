@@ -217,7 +217,12 @@ def user_login(request):
 
 @role_required('job_seeker')
 def job_seeker_dashboard(request):
-    seeker = request.user.seekerprofile
+    try:
+        
+        seeker = request.user.seekerprofile
+    except SeekerProfile.DoesNotExist:
+        messages.warning(request, "Please complete your profile to access the dashboard.")
+        return redirect('seeker_profile')
 
     # Recommended jobs based on user's skills
     user_skills = seeker.skills.all()
@@ -894,6 +899,7 @@ def seeker_profile(request):
 
             selected_skills = request.POST.getlist('skills')
             profile.skills.set(selected_skills)
+            messages.success(request, "Profile updated successfully.")
 
         return redirect('seeker_profile')  # redirect after POST
 
