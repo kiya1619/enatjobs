@@ -40,13 +40,3 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-@receiver(user_login_failed)
-def log_failed_login(sender, credentials, request, **kwargs):
-    username = credentials.get('username', 'Unknown')
-    ip = get_client_ip(request)
-
-    FailedLoginAttempt.objects.create(
-        username=username,
-        ip_address=ip,
-        timestamp=timezone.now()
-    )

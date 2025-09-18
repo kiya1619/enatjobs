@@ -42,6 +42,20 @@
         <div>
             <button id="tableViewBtn" class="btn btn-primary btn-sm me-2"><i class="fas fa-table me-1"></i> Table View</button>
             <button id="cardViewBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-th-large me-1"></i> Card View</button>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+                <label>
+                    Show
+                    <select id="rowsPerPage" class="form-select form-select-sm d-inline-block" style="width: auto;">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="30">30</option>
+                    </select>
+                    entries
+                </label>
+            </div>
+         
+        </div>
         </div>
         <div class="btn-group">
             <button id="exportCsv" class="btn btn-outline-success btn-sm"><i class="fas fa-file-csv me-1"></i> CSV</button>
@@ -123,6 +137,13 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+           <div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+                </nav>
+            </div>
     </div>
 
 </div>
@@ -231,7 +252,6 @@ document.getElementById('exportExcel').addEventListener('click', () => {
 document.getElementById('exportCsv').addEventListener('click', () => {
     exportTableToExcel('#applicantsTable', 'Applicants.csv');
 });
-
 document.getElementById('exportPdf').addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -246,21 +266,83 @@ const modalTitle = coverLetterModal.querySelector('.modal-title');
 
 document.querySelectorAll('.view-cover-letter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        const content = btn.getAttribute('data-coverletter');
-        const applicant = btn.getAttribute('data-applicant');
-        coverLetterContent.textContent = content;
-        modalTitle.textContent = 'Cover Letter - ' + applicant;
-    });
-});
-document.querySelectorAll('.view-cover-letter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
         let content = btn.getAttribute('data-coverletter');
-        content = content.replace(/\\u000D\\u000A/g, '\n');  // replace escaped CRLF with real newline
+        content = content.replace(/\\u000D\\u000A/g, '\n');
         const applicant = btn.getAttribute('data-applicant');
         coverLetterContent.textContent = content;
         modalTitle.textContent = 'Cover Letter - ' + applicant;
     });
 });
+
+// Pagination
+const table = document.getElementById("applicantsTable");
+const tableBody = table.querySelector("tbody");
+const rows = tableBody.querySelectorAll("tr");
+const paginationControls = document.getElementById("paginationControls");
+const rowsPerPageSelect = document.getElementById("rowsPerPage");
+
+let currentPage = 1;
+let rowsPerPage = parseInt(rowsPerPageSelect.value);
+
+function displayTablePage(page) {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    rows.forEach((row, index) => {
+        row.style.display = (index >= start && index < end) ? "" : "none";
+    });
+    renderPagination();
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+    paginationControls.innerHTML = "";
+
+    // Prev button
+    const prevLi = document.createElement("li");
+    prevLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+    prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+    prevLi.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayTablePage(currentPage);
+        }
+    });
+    paginationControls.appendChild(prevLi);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement("li");
+        li.className = "page-item " + (i === currentPage ? "active" : "");
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.addEventListener("click", () => {
+            currentPage = i;
+            displayTablePage(currentPage);
+        });
+        paginationControls.appendChild(li);
+    }
+
+    // Next button
+    const nextLi = document.createElement("li");
+    nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+    nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+    nextLi.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayTablePage(currentPage);
+        }
+    });
+    paginationControls.appendChild(nextLi);
+}
+
+rowsPerPageSelect.addEventListener("change", () => {
+    rowsPerPage = parseInt(rowsPerPageSelect.value);
+    currentPage = 1;
+    displayTablePage(currentPage);
+});
+
+// Initialize
+displayTablePage(currentPage);
 </script>
 
 {% endblock %}

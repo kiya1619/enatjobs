@@ -100,38 +100,57 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').lower()
         password = request.POST.get('password')
 
-        # Count failed attempts in the last LOCKOUT_TIME minutes
+        # Count failed attempts in last LOCKOUT_TIME minutes
         recent_failed = FailedLoginAttempt.objects.filter(
             username=username,
             timestamp__gte=timezone.now() - timedelta(minutes=LOCKOUT_TIME)
         ).count()
 
-        # Check lockout
+        # ✅ Lockout due to too many failed attempts
         if recent_failed >= MAX_FAILED_ATTEMPTS:
             messages.error(request, f"Too many failed login attempts. Try again in {LOCKOUT_TIME} minute(s).")
             return redirect('login')
 
-        # Authenticate
+        # ✅ Check if user exists and is locked by admin
+        try:
+            user_obj = User.objects.get(username=username)
+            if not user_obj.is_active:
+                messages.error(request, "Your account has been locked. Please contact the administrator: Abdisa Shibru, 0977062008.")
+                return redirect('login')
+        except User.DoesNotExist:
+            user_obj = None
+
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
 
+        # Login failed
         if user is None:
-            # Current attempt number = previous failed + 1
-            current_attempt = recent_failed + 1
+            # 🔹 Do not log failed attempt for already locked accounts
+            if user_obj and not user_obj.is_active:
+                messages.error(request, "Your account has been locked. Please contact the administrator.")
+                return redirect('login')
 
-            # Log failed attempt
+            # Log the failed attempt
             FailedLoginAttempt.objects.create(
                 username=username,
                 ip_address=get_client_ip(request),
                 timestamp=timezone.now()
             )
 
+            current_attempt = recent_failed + 1
             remaining_attempts = MAX_FAILED_ATTEMPTS - current_attempt
+
+            # Optional: automatically lock user after max failed attempts
+            if user_obj and current_attempt >= MAX_FAILED_ATTEMPTS:
+                user_obj.is_active = False
+                user_obj.save()
+                messages.error(request, "Your account has been locked due to too many failed login attempts. Contact admin.")
+                return redirect('login')
 
             if remaining_attempts > 0:
                 messages.error(request, f"Invalid username or password. You have {remaining_attempts} attempt(s) left.")
@@ -140,11 +159,12 @@ def user_login(request):
 
             return redirect('login')
 
-        # Successful login: clear old failed attempts
+        # ✅ Successful login: clear old failed attempts
         FailedLoginAttempt.objects.filter(username=username).delete()
 
-        # Log in and redirect
         login(request, user)
+
+        # Redirect by role
         if getattr(user, 'is_employer', False):
             return redirect('employer_dashboard')
         elif getattr(user, 'is_job_seeker', False):
@@ -153,6 +173,8 @@ def user_login(request):
             return redirect('admin_dashboard')
 
     return render(request, 'job/login.html')
+
+
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import authenticate, login
@@ -160,60 +182,6 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from .models import FailedLoginAttempt
 
-MAX_FAILED_ATTEMPTS = 5
-LOCKOUT_TIME = 1  # in minutes
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
-def user_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username', '').lower()
-        password = request.POST.get('password')
-
-        # Get or create LoginAttempt object for this user
-        attempt, created = LoginAttempt.objects.get_or_create(username=username)
-
-        # Check if locked
-        if attempt.is_locked():
-            messages.error(request, f"Too many failed attempts. Try again in {attempt.remaining_lockout_minutes()} minute(s).")
-            return redirect('login')
-
-        # Authenticate
-        user = authenticate(request, username=username, password=password)
-
-        if user is None:
-            # Increment failed attempts
-            attempt.failed_attempts += 1
-            if attempt.failed_attempts >= MAX_FAILED_ATTEMPTS:
-                attempt.lockout_until = timezone.now() + timedelta(minutes=LOCKOUT_TIME)
-                messages.error(request, f"Invalid username or password. You have reached the maximum attempts. Try again in {LOCKOUT_TIME} minute(s).")
-            else:
-                remaining_attempts = MAX_FAILED_ATTEMPTS - attempt.failed_attempts
-                messages.error(request, f"Invalid username or password. You have {remaining_attempts} attempt(s) left.")
-            attempt.save()
-            return redirect('login')
-
-        # Successful login: reset attempts
-        attempt.failed_attempts = 0
-        attempt.lockout_until = None
-        attempt.save()
-
-        # Log in user
-        login(request, user)
-        if getattr(user, 'is_employer', False):
-            return redirect('employer_dashboard')
-        elif getattr(user, 'is_job_seeker', False):
-            return redirect('job_seeker_dashboard')
-        elif user.is_superuser:
-            return redirect('admin_dashboard')
-
-    return render(request, 'job/login.html')
 
 @role_required('job_seeker')
 def job_seeker_dashboard(request):
@@ -1305,3 +1273,14 @@ def user_setting(request):
             return redirect('user_setting')  # reload page
 
     return render(request, 'job/user_setting.html')
+@role_required('admin')
+def toggle_user_status(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if not user.is_superuser:  # prevent locking admins
+        user.is_active = not user.is_active  # toggle
+        user.save()
+        if user.is_active:
+            messages.success(request, f"✅ {user.username} has been unlocked.")
+        else:
+            messages.warning(request, f"🔒 {user.username} has been locked.")
+    return redirect('userlist')  # adjust with your template view name
