@@ -56,7 +56,9 @@ urlpatterns = [
     path('notifications/mark_all_read/', views.mark_all_notifications_read_ajax, name='mark_all_notifications_read_ajax'),
     path('applications/withdraw/<int:app_id>/', views.withdraw_application, name='withdraw_application'),
     path("ads.txt", ads_txt, name="ads_txt"),
-    
+    path('toggle_user_status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
+
+
 
 
 
